@@ -3,7 +3,7 @@ import axios from "axios";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -25,6 +25,11 @@ export default function ProfilePage() {
     console.log(res.data);
     setData(res.data.data._id);
   };
+
+  useEffect(() => {
+    getUserDetails();
+    redirect("/profile/${data}");
+  }, []);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen py-2">
