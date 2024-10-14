@@ -4,6 +4,36 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+first, you need to init the project with your package manager of choice, for
+example:
+
+```bash
+npm init
+# or
+yarn init
+# or 
+pnpm init
+
+then you need to install the dependencies:
+```bash
+npm install axios bcryptjs nodemailer jsonwebtoken react-hot-toast mongoose
+# or 
+yarn add axios bcryptjs nodemailer jsonwebtoken react-hot-toast mongoose
+#or 
+pnpm add axios bcryptjs nodemailer jsonwebtoken react-hot-toast mongoose
+```
+
+After you need to create a MongoDB account & database
+
+Following you need to create a `.env` file in the root of the project with the following content:
+
+```bash
+MONGO_URI=your_mongo_uri
+JWT_SECRET=your_jwt_secret
+#for local hosting
+DOMAIN=http://localhost:3000
+```
+
 First, run the development server:
 
 ```bash

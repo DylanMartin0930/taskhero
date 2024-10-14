@@ -4,7 +4,9 @@ import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import toast from "react-hot-toast";
+import LoginPagePresenter from "../../components/LoginPresenter";
 
+//Container for the Login Page
 export default function LoginPage() {
   const router = useRouter();
   const [user, setUser] = React.useState({
@@ -25,6 +27,8 @@ export default function LoginPage() {
     } catch (error: any) {
       console.log(error.message);
       toast.error(error.message);
+      //Reset the Form Inputs
+      setUser({ email: "", password: "" });
     } finally {
       setLoading(false);
     }
@@ -39,37 +43,12 @@ export default function LoginPage() {
   }, [user]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen py-2">
-      <h1>{loading ? "processing" : "Login"}</h1>
-
-      <hr />
-      {/* Email */}
-      <label htmlFor="email">Email</label>
-      <input
-        className="p-2 m-4 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:border-gray-600 text-black"
-        id="email"
-        type="text"
-        value={user.email}
-        onChange={(e) => setUser({ ...user, email: e.target.value })}
-        placeholder="email"
-      />
-      {/* Password */}
-      <label htmlFor="password">Password</label>
-      <input
-        className="p-2 m-4 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:border-gray-600 text-black"
-        id="password"
-        type="password"
-        value={user.password}
-        onChange={(e) => setUser({ ...user, password: e.target.value })}
-        placeholder="password"
-      />
-      <button
-        onClick={onLogin}
-        className="p-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:border-gray-600 text-white"
-      >
-        {buttonDisabled ? "Missing Field" : "Login"}
-      </button>
-      <Link href="/signup">Visit Signup Page </Link>
-    </div>
+    <LoginPagePresenter
+      loading={loading}
+      user={user}
+      setUser={setUser}
+      onLogin={onLogin}
+      buttonDisabled={buttonDisabled}
+    />
   );
 }
