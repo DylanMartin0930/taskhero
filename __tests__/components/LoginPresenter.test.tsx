@@ -12,7 +12,11 @@ describe("LoginPresenter", () => {
     },
   };
 
-  const mockOnLogin = vi.fn();
+  const mockOnLogin = async () => {
+    const response = await fetch("/login");
+    const data = await response.json();
+    return data;
+  };
 
   it("Should render headers for Email and Password", () => {
     render(
@@ -42,10 +46,10 @@ describe("LoginPresenter", () => {
       />,
     );
 
-    const emailHeader = screen.getByRole("textbox", { name: "Email" });
-    const passwordHeader = screen.getByRole("textbox", { name: "Password" });
-    expect(emailHeader).toBeInTheDocument();
-    expect(passwordHeader).toBeInTheDocument();
+    const emailField = screen.getByPlaceholderText(/email/i);
+    const passwordField = screen.getByPlaceholderText(/password/i);
+    expect(emailField).toBeInTheDocument();
+    expect(passwordField).toBeInTheDocument();
   });
 
   it("Should render a link to signup page", () => {

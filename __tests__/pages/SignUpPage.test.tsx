@@ -21,20 +21,21 @@ describe("SignUpPage", () => {
     expect(button).toHaveTextContent("Missing Field");
 
     //only email input
-    const emailInput = screen.getByRole("textbox", { name: "Email" });
+    const emailInput = screen.getByPlaceholderText(/email/i);
 
     fireEvent.change(emailInput, { target: { value: "test@gmail.com" } });
     expect(button).toHaveTextContent("Missing Field");
 
     //only email & username input
-    const usernameInput = screen.getByRole("textbox", { name: "Username" });
+    const usernameInput = screen.getByPlaceholderText(/username/i);
     fireEvent.change(usernameInput, { target: { value: "test" } });
     expect(button).toHaveTextContent("Missing Field");
 
     //only password input
-    const passwordInput = screen.getByRole("textbox", { name: "Password" });
+    const passwordInput = screen.getByPlaceholderText(/password/i);
 
     fireEvent.change(emailInput, { target: { value: "" } });
+    fireEvent.change(usernameInput, { target: { value: "" } });
     fireEvent.change(passwordInput, { target: { value: "1234" } });
     expect(button).toHaveTextContent("Missing Field");
   });
@@ -42,9 +43,9 @@ describe("SignUpPage", () => {
   it("Render button with 'SignUp' with both Email & Password values", () => {
     render(<SignUpPage />);
 
-    const emailInput = screen.getByRole("textbox", { name: "Email" });
-    const passwordInput = screen.getByRole("textbox", { name: "Password" });
-    const usernameInput = screen.getByRole("textbox", { name: "Username" });
+    const emailInput = screen.getByPlaceholderText(/email/i);
+    const passwordInput = screen.getByPlaceholderText(/password/i);
+    const usernameInput = screen.getByPlaceholderText(/username/i);
 
     fireEvent.change(emailInput, { target: { value: "test@gmail.com" } });
     fireEvent.change(passwordInput, { target: { value: "1234" } });
@@ -57,9 +58,9 @@ describe("SignUpPage", () => {
   it("Should call onLogin function when the Enabled button is clicked", async () => {
     render(<SignUpPage />);
 
-    const emailInput = screen.getByRole("textbox", { name: "Email" });
-    const passwordInput = screen.getByRole("textbox", { name: "Password" });
-    const usernameInput = screen.getByRole("textbox", { name: "Username" });
+    const emailInput = screen.getByPlaceholderText(/email/i);
+    const passwordInput = screen.getByPlaceholderText(/password/i);
+    const usernameInput = screen.getByPlaceholderText(/username/i);
 
     fireEvent.change(emailInput, { target: { value: "test@gmail.com" } });
     fireEvent.change(passwordInput, { target: { value: "1234" } });

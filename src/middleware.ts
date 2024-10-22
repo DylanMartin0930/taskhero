@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 // This function can be marked `async` if using `await` inside
+//middleware.tsx
 export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
@@ -24,5 +25,13 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   //login & signup are public paths
-  matcher: ["/", "/profile/:path*", "/login", "/signup, /verifyemail/:path*"],
+  matcher: [
+    "/",
+    "/profile/:path*",
+    "/profile",
+    "/login",
+    "/signup",
+    "/verifyemail/:path*",
+    "/dashboard",
+  ],
 };

@@ -1,8 +1,7 @@
 "use client";
-import Link from "next/link";
 import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import toast from "react-hot-toast";
 import LoginPagePresenter from "../../components/LoginPresenter";
 
@@ -25,8 +24,11 @@ export default function LoginPage() {
       toast.success("Login successful");
       router.push("/profile");
     } catch (error: any) {
-      console.log(error.message);
-      toast.error(error.message);
+      if (error instanceof AxiosError) {
+        const errorMessage = await error.response.data.error;
+        console.log(error.message);
+        toast.error(errorMessage);
+      }
       //Reset the Form Inputs
       setUser({ email: "", password: "" });
     } finally {

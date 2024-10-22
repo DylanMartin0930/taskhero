@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import Task from "./taskModel.js";
 
 const userSchema = new mongoose.Schema({
   username: {
@@ -23,6 +24,20 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+
+  writeAccess: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "task",
+    },
+  ],
+  readAccess: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "task",
+    },
+  ],
+
   forgotPasswordToken: String,
   forgotPasswordExpiry: Date,
   verifyToken: String,

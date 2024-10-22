@@ -7,5 +7,11 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: "__tests__/setup.ts",
+    reporters: ["verbose"],
+  },
+  resolve: {
+    alias: {
+      "@": "/src",
+    },
   },
 });

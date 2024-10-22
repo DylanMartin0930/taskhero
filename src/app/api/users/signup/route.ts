@@ -26,11 +26,14 @@ export async function POST(request: NextRequest) {
     const hashedPassword = await bcryptjs.hash(password, salt);
 
     //create new user
+    console.log("Creating new user");
     const newUser = new User({
       username,
       email,
       password: hashedPassword,
     });
+
+    console.log("New user created");
 
     const savedUser = await newUser.save();
     console.log(savedUser);
@@ -48,7 +51,9 @@ export async function POST(request: NextRequest) {
       success: true,
       savedUser,
     });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
   }
 }

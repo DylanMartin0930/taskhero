@@ -1,4 +1,5 @@
 "use client";
+import { useEffect } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { redirect, useRouter } from "next/navigation";
@@ -16,6 +17,7 @@ export default function UserProfile({ params }: any) {
       toast.error(error.message);
     }
   };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen py-2">
       <h1>Profile</h1>

@@ -6,6 +6,7 @@ import jwt from "jsonwebtoken";
 
 connect();
 
+// /api/users/login/route.tsx
 export async function POST(request: NextRequest) {
   try {
     const reqBody = await request.json();
@@ -17,7 +18,7 @@ export async function POST(request: NextRequest) {
     if (!user) {
       return NextResponse.json(
         { error: "User does not exist" },
-        { status: 400 },
+        { status: 500 },
       );
     }
 
@@ -29,15 +30,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid password" }, { status: 400 });
     }
     //check if user is verified
-    if (user.verified === false) {
+    if (user.isVerified === false) {
       return NextResponse.json({ error: "User not verified" }, { status: 400 });
     }
 
+    //api/users/login/route.tsx
     //create token data
     const tokenData = {
       id: user._id,
       username: user.username,
       email: user.email,
+      readAccess: user.readAccess,
+      writeAccess: user.writeAccess,
     };
 
     //create token
@@ -49,10 +53,17 @@ export async function POST(request: NextRequest) {
       message: "Login successful",
       success: true,
     });
-    response.cookies.set("token", token, { httpOnly: true });
+    response.cookies.set("token", token, {
+      httpOnly: true,
+      secure: true,
+      expires: new Date(Date.now() + 9000000),
+      maxAge: 9000000,
+    });
 
     return response;
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
   }
 }

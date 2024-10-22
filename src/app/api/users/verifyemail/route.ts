@@ -25,7 +25,9 @@ export async function POST(request: NextRequest) {
     await user.save();
 
     return NextResponse.json({ message: "Email verified", success: true });
-  } catch (error: any) {
-    throw NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      throw NextResponse.json({ error: error.message }, { status: 500 });
+    }
   }
 }

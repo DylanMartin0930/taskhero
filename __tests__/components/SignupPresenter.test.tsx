@@ -25,12 +25,12 @@ describe("LoginPresenter", () => {
       />,
     );
 
-    const emailHeader = screen.getByText("Email");
-    const passwordHeader = screen.getByText("Password");
-    const usernameHeader = screen.getByText("Username");
-    expect(emailHeader).toBeInTheDocument();
-    expect(passwordHeader).toBeInTheDocument();
-    expect(usernameHeader).toBeInTheDocument();
+    const emailInput = screen.getByPlaceholderText(/email/i);
+    const passwordInput = screen.getByPlaceholderText(/password/i);
+    const usernameInput = screen.getByPlaceholderText(/username/i);
+    expect(emailInput).toBeInTheDocument();
+    expect(passwordInput).toBeInTheDocument();
+    expect(usernameInput).toBeInTheDocument();
   });
 
   it("Should render Input fields for both Email, Username, and Password", () => {
@@ -44,13 +44,13 @@ describe("LoginPresenter", () => {
       />,
     );
 
-    const emailHeader = screen.getByRole("textbox", { name: "Email" });
-    const passwordHeader = screen.getByRole("textbox", { name: "Password" });
-    const usernameHeader = screen.getByRole("textbox", { name: "Username" });
+    const emailInput = screen.getByPlaceholderText(/email/i);
+    const passwordInput = screen.getByPlaceholderText(/password/i);
+    const usernameInput = screen.getByPlaceholderText(/username/i);
 
-    expect(emailHeader).toBeInTheDocument();
-    expect(passwordHeader).toBeInTheDocument();
-    expect(usernameHeader).toBeInTheDocument();
+    expect(emailInput).toBeInTheDocument();
+    expect(passwordInput).toBeInTheDocument();
+    expect(usernameInput).toBeInTheDocument();
   });
 
   it("Should render a link to signup Login page", () => {

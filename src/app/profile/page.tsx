@@ -23,12 +23,15 @@ export default function ProfilePage() {
   const getUserDetails = async () => {
     const res = await axios.get("/api/users/me");
     console.log(res.data);
-    setData(res.data.data._id);
+    setData(res.data.data.username);
+  };
+  const toDash = async () => {
+    router.push("/dashboard");
   };
 
   useEffect(() => {
     getUserDetails();
-    redirect("/profile/${data}");
+    // redirect(`/profile/${data}`);
   }, []);
 
   return (
@@ -53,10 +56,10 @@ export default function ProfilePage() {
       </button>
 
       <button
-        onClick={getUserDetails}
+        onClick={toDash}
         className="p-2 bg-purple-300 mt-4 rounded-lg mb-4 focus:outline-none focus:border-gray-600 text-black"
       >
-        Get User Details
+        To DashBoard
       </button>
     </div>
   );
