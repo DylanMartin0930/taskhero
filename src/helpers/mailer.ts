@@ -19,12 +19,13 @@ export const sendEmail = async ({ email, emailType, userID }: any) => {
       });
     }
 
+    //Paste Mail Trap InfoHere
     var transport = nodemailer.createTransport({
       host: "sandbox.smtp.mailtrap.io",
       port: 2525,
       auth: {
-        user: "a83356f6929ef3",
-        pass: "5f78cf1fff8da5",
+        user: process.env.MTRAP_USER?.toString(),
+        pass: process.env.MTRAP_PASS?.toString(),
       },
     });
 
