@@ -80,7 +80,8 @@ Setting up Mailtrap
 4. in the credentials copy the username & password into the .ENV file specified
    below
 ---
-Following you need to create a `.env` file in the projects root directory file in the root of the project with the following content:
+Following you need to create a `.env` file in the projects root directory with
+the following contents
 
 ```bash
 MONGO_URI=your_mongo_uri
