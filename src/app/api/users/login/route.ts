@@ -53,11 +53,11 @@ export async function POST(request: NextRequest) {
       message: "Login successful",
       success: true,
     });
+    const fourHours = 4 * 60 * 60;
     response.cookies.set("token", token, {
       httpOnly: true,
       secure: true,
-      expires: new Date(Date.now() + 9000000),
-      maxAge: 9000000,
+      maxAge: fourHours,
     });
 
     return response;
