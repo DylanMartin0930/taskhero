@@ -18,7 +18,9 @@ export default function DashboardLayout({
         <Header />
         <div className="flex">
           <Navbar />
-          <div className="t-[60px] l-[300px] flex-1">{children}</div>
+          <div className="t-[60px] ml-[300px] h-full flex-1 bg-white">
+            {children}
+          </div>
         </div>
       </div>
     </div>

@@ -9,17 +9,23 @@ const taskSchema = new mongoose.Schema({
     type: String,
     required: [true, "Please provide a description"],
   },
-  folder: [
-    {
-      section: {
-        type: String,
-        default: "inbox",
-      },
-      project: {
-        type: String,
-      },
-    },
-  ],
+
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "task",
+    required: true,
+  },
+
+  folder: {
+    type: String,
+    default: "Inbox",
+  },
+
+  project: {
+    type: String,
+    default: null,
+  },
+
   createdDate: {
     type: Date,
     required: true,
@@ -27,6 +33,7 @@ const taskSchema = new mongoose.Schema({
   },
   dueDate: {
     type: Date,
+    default: null,
   },
 });
 

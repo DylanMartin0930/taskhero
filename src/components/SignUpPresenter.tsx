@@ -24,7 +24,7 @@ export default function SignupPagePresenter({
       <h1>{loading ? "Processing..." : "Login"}</h1>
       <hr />
       {/* Username*/}
-      <label htmlFor="email">Email</label>
+      <label htmlFor="username">Username</label>
       <input
         name="username"
         type="text"

@@ -1,8 +1,10 @@
 "use client";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
 
 export default function Dashboard() {
+  const router = useRouter();
   const [currentPage, setCurrentPage] = useState("inbox");
   const [data, setData] = useState("nothing");
 
@@ -16,8 +18,12 @@ export default function Dashboard() {
     }
   };
 
+  const defaultRoute = async () => {
+    router.push("/dashboard/inbox");
+  };
+
   useEffect(() => {
-    getUserDetails();
+    defaultRoute();
   }, []);
 
   return (
