@@ -3,15 +3,15 @@ import User from "@/models/userModel";
 import Task from "@/models/taskModel";
 import { NextRequest, NextResponse } from "next/server";
 import { getDataFromToken } from "@/helpers/getDataFromToken";
-import { completeTask } from "@/components/queries/completeTask";
 
 connect();
 
 // /api/users/login/route.tsx
 export async function POST(request: NextRequest) {
   try {
-    //extract the folder name from request body
-    const { folderName } = await request.json();
+    //extract taskID from request body
+    const { taskId } = await request.json();
+
     //get user from database
     const userID = getDataFromToken(request);
     const user = await User.findOne({ _id: userID }).select("-password");
@@ -20,22 +20,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const tasks = await Task.find({
-      userId: userID,
-      folder: folderName, // Filter by folder
-      Completestatus: false, // Filter by complete status
-    });
+    // Find the task by TaskID and update completeStatus
+    const updatedTask = await Task.findOneAndUpdate(
+      { _id: taskId, userId: userID }, // Ensure the task belongs to the user
+      { Completestatus: true, completeDate: Date.now() }, // Update completeStatus to true
+      { new: true }, // Return the updated document
+    );
 
-    if (tasks.length === 0) {
-      return NextResponse.json({
-        message: "No tasks found",
-        data: [],
-      });
+    if (!updatedTask) {
+      return NextResponse.json(
+        { error: "Task not found or not authorized" },
+        { status: 404 },
+      );
     }
 
     return NextResponse.json({
-      message: "Tasks Found",
-      data: tasks,
+      message: "Tasks Completed!",
+      data: updatedTask,
     });
   } catch (error: any) {
     return NextResponse.json({ error: "getTask API Failed" }, { status: 500 });

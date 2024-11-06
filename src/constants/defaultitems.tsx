@@ -9,7 +9,7 @@ export const DEFAULT_ITEMS: SideNavItem[] = [
   },
   {
     title: "Today",
-    path: "/today",
+    path: "/dashboard/today",
     icon: <Icon icon="lucide:home" width="24" height="24" />,
   },
 
@@ -21,7 +21,7 @@ export const DEFAULT_ITEMS: SideNavItem[] = [
 
   {
     title: "Logbook",
-    path: "/logbook",
+    path: "/dashboard/logbook",
     icon: <Icon icon="lucide:home" width="24" height="24" />,
   },
 

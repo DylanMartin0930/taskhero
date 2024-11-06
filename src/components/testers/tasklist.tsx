@@ -10,7 +10,7 @@ const TaskList = () => {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const fetchTasks = async () => {
+    const fetchTasksTester = async () => {
       try {
         setLoading(true);
         const { data } = await axios.get("/api/tasks");
@@ -23,7 +23,7 @@ const TaskList = () => {
         }
       }
     };
-    fetchTasks();
+    fetchTasksTester();
   }, []);
 
   if (isLoading) {

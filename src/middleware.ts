@@ -17,8 +17,8 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/profile", request.nextUrl));
   }
 
-  //if not logged in, redirect to login
   if (!isPublicPath && !token) {
+    //if not logged in, redirect to login
     return NextResponse.redirect(new URL("/login", request.nextUrl));
   }
 }
@@ -33,5 +33,6 @@ export const config = {
     "/signup",
     "/verifyemail/:path*",
     "/dashboard",
+    "/dashboard/:path*",
   ],
 };

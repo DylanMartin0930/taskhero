@@ -5,10 +5,10 @@ import TaskListWrapper from "@/components/ui/tasklistwrapper";
 function Inbox() {
   return (
     <div className="text-black h-screen flex flex-col p-[10px]">
-      <h1 className="text-xl mb-4">Inbox</h1>
+      <h1 className="text-xl mb-4">Today</h1>
       <hr />
-      <div className="w-full" data-testid="task-list-wrapper">
-        <TaskListWrapper folder={"Inbox"} />
+      <div className="w-full">
+        <TaskListWrapper folder={"Today"} />
       </div>
     </div>
   );

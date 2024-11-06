@@ -10,7 +10,15 @@ connect();
 export async function POST(request: NextRequest) {
   try {
     const reqBody = await request.json();
-    const { title, description } = reqBody;
+    const { title, description, dueDate, assignedDate } = reqBody;
+    console.log(dueDate);
+    // Check for missing fields
+    if (!title || !description) {
+      return NextResponse.json(
+        { error: "Please provide all fields" },
+        { status: 400 }, // Bad Request
+      );
+    }
     console.log(reqBody);
 
     //get user from database
@@ -24,6 +32,8 @@ export async function POST(request: NextRequest) {
     const newTask = new Task({
       title: title,
       description: description,
+      dueDate: dueDate,
+      assignedDate: assignedDate,
       userId: userID,
     });
 

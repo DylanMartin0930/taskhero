@@ -10,8 +10,6 @@ connect();
 // /api/users/login/route.tsx
 export async function POST(request: NextRequest) {
   try {
-    //extract the folder name from request body
-    const { folderName } = await request.json();
     //get user from database
     const userID = getDataFromToken(request);
     const user = await User.findOne({ _id: userID }).select("-password");
@@ -22,8 +20,7 @@ export async function POST(request: NextRequest) {
 
     const tasks = await Task.find({
       userId: userID,
-      folder: folderName, // Filter by folder
-      Completestatus: false, // Filter by complete status
+      Completestatus: true, // Filter by complete status
     });
 
     if (tasks.length === 0) {

@@ -6,7 +6,7 @@ export default function Home() {
 
   useEffect(() => {
     router.push("/login");
-  });
+  }, []);
   return (
     <>
       <span className="font-bold text-4xl">Home</span>

@@ -21,6 +21,11 @@ const taskSchema = new mongoose.Schema({
     default: "Inbox",
   },
 
+  Completestatus: {
+    type: Boolean,
+    default: false,
+  },
+
   project: {
     type: String,
     default: null,
@@ -31,7 +36,18 @@ const taskSchema = new mongoose.Schema({
     required: true,
     default: Date.now,
   },
+
   dueDate: {
+    type: Date,
+    default: null,
+  },
+
+  assignedDate: {
+    type: Date,
+    default: null,
+  },
+
+  completeDate: {
     type: Date,
     default: null,
   },
