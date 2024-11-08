@@ -40,11 +40,6 @@ export async function POST(request: NextRequest) {
     // Save the task
     const savedTask = await newTask.save();
 
-    // Add the task to the Inbox folder new project
-    user.tasks.push(savedTask._id);
-
-    await user.save();
-
     return NextResponse.json({
       message: "User Found and Task Added",
       data: user,

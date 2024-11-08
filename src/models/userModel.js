@@ -24,10 +24,15 @@ const userSchema = new mongoose.Schema({
     default: false,
   },
 
-  tasks: [
+  folders: [
     {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "task",
+      type: String,
+    },
+  ],
+
+  projects: [
+    {
+      type: String,
     },
   ],
 

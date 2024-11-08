@@ -27,11 +27,9 @@ export async function POST(request: NextRequest) {
     }
     await Task.deleteOne({ _id: taskId });
 
-    await user.save();
-
     return NextResponse.json({
-      message: "User Found and Task Added",
-      data: user,
+      message: "Task Deleted Successfully",
+      success: true,
     });
   } catch (error: any) {
     return NextResponse.json(

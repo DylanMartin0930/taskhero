@@ -1,6 +1,6 @@
 import { connect } from "@/dbConfig/dbConfig";
 import User from "@/models/userModel";
-import Task from "@/models/taskModel";
+import Project from "@/models/projectModel";
 import { NextRequest, NextResponse } from "next/server";
 import { getDataFromToken } from "@/helpers/getDataFromToken";
 
@@ -8,8 +8,9 @@ connect();
 
 export async function POST(request: NextRequest) {
   try {
-    //extract the folder name from request body
-    const { folderName } = await request.json();
+    const { projectId } = await request.json();
+    console.log(projectId);
+
     //get user from database
     const userID = getDataFromToken(request);
     const user = await User.findOne({ _id: userID }).select("-password");
@@ -18,24 +19,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const tasks = await Task.find({
-      userId: userID,
-      folder: folderName, // Filter by folder
-      Completestatus: false, // Filter by complete status
-    });
+    const project = await Project.findOne({ _id: projectId, userId: userID });
 
-    if (tasks.length === 0) {
-      return NextResponse.json({
-        message: "No tasks found",
-        data: [],
-      });
+    if (!project) {
+      return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
+    await project.deleteOne({ _id: projectId });
 
     return NextResponse.json({
-      message: "Tasks Found",
-      data: tasks,
+      message: "Project Deleted successfully",
+      success: true,
     });
   } catch (error: any) {
-    return NextResponse.json({ error: "getTask API Failed" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Project Delete Failed" },
+      { status: 500 },
+    );
   }
 }

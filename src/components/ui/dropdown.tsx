@@ -2,7 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { USER_ITEMS } from "@/constants/useritems";
 
-function Dropdown() {
+function Dropdown(props) {
   const [isOpen, setIsOpen] = React.useState(false);
 
   const handleDropdown = async () => {
@@ -15,7 +15,7 @@ function Dropdown() {
         onClick={handleDropdown}
         className="mt-2 bg-white text-black rounded-md border border-black w-48"
       >
-        Dropdown
+        {props.userInfo}
       </button>
       {isOpen && (
         <div className="z-40 top-full bg-white text-black mt-[1px] rounded-md border border-black w-48">

@@ -92,7 +92,7 @@ function NewTask({ onTaskCreated }) {
           <DatePicker
             placeholderText="Assigned Date(MM/DD/YYYY)"
             dateFormat={"MM/dd/yyyy"}
-            selected={task.asssignedDate}
+            selected={task.assignedDate}
             onChange={(date) => handleAssignedDateChange(date)}
             className="w-full p-2 mt-2 bg-gray-200 rounded-md text-left"
             isClearable

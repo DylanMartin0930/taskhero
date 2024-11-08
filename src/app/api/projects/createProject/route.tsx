@@ -1,15 +1,14 @@
 import { connect } from "@/dbConfig/dbConfig";
 import User from "@/models/userModel";
-import Task from "@/models/taskModel";
+import Project from "@/models/projectModel";
 import { NextRequest, NextResponse } from "next/server";
 import { getDataFromToken } from "@/helpers/getDataFromToken";
 
 connect();
 
+// /api/users/login/route.tsx
 export async function POST(request: NextRequest) {
   try {
-    //extract the folder name from request body
-    const { folderName } = await request.json();
     //get user from database
     const userID = getDataFromToken(request);
     const user = await User.findOne({ _id: userID }).select("-password");
@@ -18,24 +17,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const tasks = await Task.find({
+    const newProject = new Project({
+      title: "New Project",
       userId: userID,
-      folder: folderName, // Filter by folder
-      Completestatus: false, // Filter by complete status
     });
 
-    if (tasks.length === 0) {
-      return NextResponse.json({
-        message: "No tasks found",
-        data: [],
-      });
-    }
+    // Save the task
+    const savedProject = await newProject.save();
 
     return NextResponse.json({
-      message: "Tasks Found",
-      data: tasks,
+      message: "New Project Created",
+      data: savedProject,
     });
   } catch (error: any) {
-    return NextResponse.json({ error: "getTask API Failed" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Something went wrong" },
+      { status: 500 },
+    );
   }
 }
