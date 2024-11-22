@@ -1,29 +1,45 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Link from "next/link";
+import toast from "react-hot-toast";
+import { deleteProject } from "../queries/deleteProject";
+import { useRouter } from "next/navigation";
 
-function ProjectList() {
-  const [projects, setProjects] = useState([]);
+function ProjectList(props) {
+  const router = useRouter();
 
-  const getProjects = async () => {
+  const handleDeleteProject = async (projectId) => {
     try {
-      const response = await axios.post("/api/projects/getProjectList");
-      setProjects(response.data.data); // Access the 'data' array from the response
+      await deleteProject(projectId);
+      props.onRefresh();
+      toast.success("Project deleted successfully");
+      router.push("/dashboard/inbox");
     } catch (error) {
-      console.error("Error fetching projects:", error);
+      toast.error("Something went wrong");
+      toast.error(error.message);
     }
   };
 
-  useEffect(() => {
-    getProjects();
-  }, []);
-
   return (
     <div className="bg-gray-100 text-black flex flex-col">
-      {projects.length > 0 ? (
-        projects.map((project) => (
+      {props.projects.length > 0 ? (
+        props.projects.map((project) => (
           <div key={project._id}>
-            <Link href={`/dashboard/${project._id}`}> {project.title} </Link>
+            <Link
+              href={{
+                pathname: `/dashboard/projects/${project.title}`,
+                query: { token: project._id },
+              }}
+            >
+              {" "}
+              {project.title}{" "}
+            </Link>
+            <button
+              onClick={() => handleDeleteProject(project._id)}
+              className="ml-4 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+            >
+              Delete
+            </button>
           </div>
         ))
       ) : (

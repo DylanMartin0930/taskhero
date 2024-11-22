@@ -1,6 +1,7 @@
 import { connect } from "@/dbConfig/dbConfig";
 import { NextRequest, NextResponse } from "next/server";
 import User from "@/models/userModel";
+import Project from "@/models/projectModel";
 
 connect();
 
@@ -22,6 +23,29 @@ export async function POST(request: NextRequest) {
     user.isVerified = true;
     user.verifyToken = undefined;
     user.verifyTokenExpiry = undefined;
+
+    const defaultProjects = [
+      { title: "inbox", folder: "Inbox" },
+      { title: "today", folder: "Today" },
+      { title: "upcoming", folder: "Upcoming" },
+      { title: "logbook", folder: "Logbook" },
+      { title: "trash", folder: "Trash" },
+    ];
+
+    // Create a project for each default project
+    for (const projectData of defaultProjects) {
+      const newProject = new Project({
+        title: projectData.title,
+        folder: projectData.folder,
+        userId: user._id, // Set the user's ID for each project
+        isDefault: true, // Mark the project as default
+        tasks: [], // Initially no tasks in these projects
+        createdDate: new Date(),
+      });
+
+      await newProject.save();
+    }
+
     await user.save();
 
     return NextResponse.json({ message: "Email verified", success: true });

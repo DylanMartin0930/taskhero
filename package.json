@@ -12,11 +12,16 @@
     "test:verbose": "vitest --reporter=verbose"
   },
   "dependencies": {
+    "@fullcalendar/core": "^6.1.15",
+    "@fullcalendar/daygrid": "^6.1.15",
+    "@fullcalendar/interaction": "^6.1.15",
+    "@fullcalendar/react": "^6.1.15",
     "@iconify/react": "^5.0.2",
     "@nextui-org/dropdown": "^2.1.31",
     "axios": "^1.7.7",
     "bcryptjs": "^2.4.3",
     "clsx": "^2.1.1",
+    "cryptr": "^6.3.0",
     "framer-motion": "^11.11.9",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.6.3",

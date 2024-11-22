@@ -1,9 +1,10 @@
 import axios, { AxiosError } from "axios";
 import toast from "react-hot-toast";
 
-export const fetchCompleteTasks = async (setTaskList) => {
+export const fetchToday = async (projectId, setTaskList) => {
   try {
-    const response = await axios.post("/api/users/getCompleteTasks");
+    console.log("fetching today");
+    const response = await axios.post("/api/users/getToday", { projectId });
     setTaskList(response.data.data); // Ensure data structure is correct
   } catch (error) {
     if (error instanceof AxiosError) {

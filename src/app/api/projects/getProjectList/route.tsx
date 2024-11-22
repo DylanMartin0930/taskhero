@@ -1,36 +1,51 @@
 import { connect } from "@/dbConfig/dbConfig";
-import User from "@/models/userModel";
-import Project from "@/models/projectModel";
-import { NextRequest, NextResponse } from "next/server";
 import { getDataFromToken } from "@/helpers/getDataFromToken";
+import Project from "@/models/projectModel";
+import User from "@/models/userModel";
+import Cryptr from "cryptr";
+import { NextRequest, NextResponse } from "next/server";
 
 connect();
 
 export async function POST(request: NextRequest) {
-  try {
-    //get user from database
-    const userID = getDataFromToken(request);
-    const user = await User.findOne({ _id: userID }).select("-password");
+	try {
+		// Parse the JSON body to get the isDefault value
+		const { isDefault } = await request.json();
+		// Get user from token
+		const userID = getDataFromToken(request);
+		const user = await User.findOne({ _id: userID }).select("-password");
 
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
+		if (!user) {
+			return NextResponse.json({ error: "User not found" }, { status: 404 });
+		}
 
-    // Find projects and only return titles and _id fields
-    const projects = await Project.find({ userId: userID }).select("title _id");
-    console.log(projects);
+		// Find projects and only return titles and _id fields
+		const projects = await Project.find({
+			userId: userID,
+			isDefault: isDefault,
+		}).select("title _id");
 
-    if (!projects || projects.length === 0) {
-      return NextResponse.json({ error: "No projects found" }, { status: 404 });
-    }
+		if (!projects || projects.length === 0) {
+			return NextResponse.json({ error: "No projects found" }, { status: 404 });
+		}
 
-    return NextResponse.json({
-      message: "Projects Found",
-      data: projects,
-    });
+		// Hash each project's _id using bcryptjs
+		const cryptr = new Cryptr(process.env.TOKEN_SECRET);
+		const hashedProjects = await Promise.all(
+			projects.map(async (project) => {
+				const encryptedID = cryptr.encrypt(project._id);
+				return {
+					title: project.title,
+					_id: encryptedID,
+				};
+			})
+		);
 
-    //get user from database
-  } catch (error: any) {
-    return NextResponse.json({ error: "getTask API Failed" }, { status: 500 });
-  }
+		return NextResponse.json({
+			message: "Projects Found",
+			data: hashedProjects,
+		});
+	} catch (error: any) {
+		return NextResponse.json({ error: "getTask API Failed" }, { status: 500 });
+	}
 }

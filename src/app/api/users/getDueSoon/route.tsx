@@ -9,17 +9,8 @@ connect();
 
 export async function POST(request: NextRequest) {
   try {
-    // Extract the project ID from the request body
     const { projectId } = await request.json();
 
-    if (!projectId) {
-      return NextResponse.json(
-        { error: "Please provide a project ID" },
-        { status: 400 },
-      );
-    }
-
-    // Initialize the Cryptr instance
     const cryptr = new Cryptr(process.env.TOKEN_SECRET);
     const decryptedId = cryptr.decrypt(projectId);
 
@@ -33,7 +24,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Find the project using the decrypted ID and the user ID
+    // Find the specific project using both userId and decrypted projectId
     const project = await Project.findOne({
       _id: decryptedId,
       userId: userID,
@@ -43,25 +34,35 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
-    // Check if the project has tasks
-    if (!project.tasks || project.tasks.length === 0) {
-      return NextResponse.json({
-        message: "No tasks found",
-        data: [],
-      });
-    }
+    // Get current date and 7 days from now, normalized to midnight (no time part)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Normalize to midnight (no time part)
 
-    // Filter tasks where completeStatus is false
-    const incompleteTasks = project.tasks.filter(
-      (task) => task.completestatus === false,
-    );
+    const nextWeek = new Date(today);
+    nextWeek.setDate(today.getDate() + 7); // 7 days from today
+    nextWeek.setHours(0, 0, 0, 0); // Normalize to midnight (no time part)
+    console.log("Today:", nextWeek);
 
-    // Return only the incomplete tasks
+    // Gather tasks with `completestatus: false` and `duedate` within 7 days
+    const upcomingTasks = project.tasks.filter((task) => {
+      return (
+        task.completestatus === false && // Only tasks that are not complete
+        task.dueDate >= today && // Due within the next 7 days
+        task.dueDate <= nextWeek
+      );
+    });
+
+    console.log("Upcoming tasks:", upcomingTasks);
+
     return NextResponse.json({
-      message: "Incomplete Tasks Found",
-      data: incompleteTasks,
+      message: "Upcoming tasks retrieved successfully",
+      data: upcomingTasks,
     });
   } catch (error) {
-    return NextResponse.json({ error: "getTask API Failed" }, { status: 500 });
+    console.error(error);
+    return NextResponse.json(
+      { error: "Failed to retrieve upcoming tasks" },
+      { status: 500 },
+    );
   }
 }

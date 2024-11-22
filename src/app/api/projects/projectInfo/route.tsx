@@ -3,14 +3,19 @@ import User from "@/models/userModel";
 import Project from "@/models/projectModel";
 import { NextRequest, NextResponse } from "next/server";
 import { getDataFromToken } from "@/helpers/getDataFromToken";
+import Cryptr from "cryptr";
 
 connect();
 
 export async function POST(request: NextRequest) {
   try {
     //extract the folder name from request body
-    const { projectId } = await request.json();
-    console.log(projectId);
+    const { token } = await request.json();
+    console.log("TOKEN: ", token);
+
+    //dectypt the token
+    const cryptr = new Cryptr(process.env.TOKEN_SECRET);
+    const decryptedToken = cryptr.decrypt(token);
 
     //get user from database
     const userID = getDataFromToken(request);
@@ -21,7 +26,7 @@ export async function POST(request: NextRequest) {
     }
 
     const project = await Project.findOne({
-      _id: projectId,
+      _id: decryptedToken,
       userId: userID,
     });
 

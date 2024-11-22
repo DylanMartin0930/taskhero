@@ -1,12 +1,15 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios, { AxiosError } from "axios";
 import toast from "react-hot-toast";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import ProjectDropDown from "./projects-dropdown";
 
-function NewTask({ onTaskCreated }) {
+function NewTask(props) {
   const [isOpen, setIsOpen] = React.useState(false);
+  const [selectedProject, setSelectedProject] = useState(props.defaultProject);
+  const [projectId, setProjectId] = useState("");
   const handleDropdown = async () => {
     setIsOpen(!isOpen);
   };
@@ -17,14 +20,32 @@ function NewTask({ onTaskCreated }) {
     asssignedDate: null,
   });
 
+  // Update task.project when selectedProject changes
+  useEffect(() => {
+    setTask((prevTask) => ({
+      ...prevTask,
+      project: selectedProject,
+      folder: selectedProject ? selectedProject.title : props.folder, // Change folder based on project selection
+    }));
+  }, [selectedProject, props.folder]); // Re-run when selectedProject or props.folder changes
+
+  useEffect(() => {
+    const urlToken = window.location.search.split("=")[1];
+    setProjectId(urlToken || "");
+  }, []);
+
   const onSubmit = async () => {
+    console.log("NEW TASK PROJECT ID: ", task.project);
     try {
-      const response = await axios.post("/api/users/createtask", task);
+      const response = await axios.post("/api/users/createtask", {
+        task,
+        selectedProject,
+      });
       console.log("Task created successfully", response.data);
       toast.success("Task created successfully");
       setTask({ title: "", description: "" });
       setIsOpen(false); // Close the dropdown after task creation
-      onTaskCreated(); // Call the parent function to refresh tasks
+      props.onTaskCreated(); // Call the parent function to refresh tasks
     } catch (error: any) {
       if (error instanceof AxiosError) {
         const errorMessage = error.response?.data?.error; // No await needed
@@ -79,6 +100,10 @@ function NewTask({ onTaskCreated }) {
             className="w-full p-2 placeholder-gray-500 border-b border-gray-300 focus:outline-none"
             value={task.description}
             onChange={(e) => setTask({ ...task, description: e.target.value })}
+          />
+          <ProjectDropDown
+            userInfo="Select Project"
+            setSelectedProject={setSelectedProject}
           />
           <DatePicker
             placeholderText="Due Date (MM/DD/YYYY)"

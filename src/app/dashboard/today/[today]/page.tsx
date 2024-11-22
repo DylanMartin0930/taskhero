@@ -2,14 +2,12 @@
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import axios from "axios";
-import { deleteProject } from "@/components/queries/deleteProject";
-import { useRouter } from "next/navigation";
+import TaskListWrapper from "@/components/ui/tasklistwrapper";
+import { fetchToday } from "@/components/queries/fetchToday";
 
-export default function ProjectPage({ params }: any) {
-  const router = useRouter();
-
+export default function TodayPage({ params }: any) {
+  const [token, setToken] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const projectId = params.project;
   const [projectInfo, setProjectInfo] = useState({
     title: "",
     description: "",
@@ -18,13 +16,15 @@ export default function ProjectPage({ params }: any) {
 
   const getProjectInfo = async () => {
     try {
+      if (!token) return; // Ensure we don't proceed if token is empty
+      console.log("Token: ", token);
       setIsLoading(true); // Set loading to true before starting the request
       const response = await axios.post("/api/projects/projectInfo", {
-        projectId,
+        token,
       });
       toast.success(response.data.message);
       setProjectInfo(response.data.data);
-    } catch (error) {
+    } catch (error: any) {
       toast.error("Something went wrong");
       toast.error(error.message);
     } finally {
@@ -32,21 +32,17 @@ export default function ProjectPage({ params }: any) {
     }
   };
 
-  const handleDeleteProject = async () => {
-    try {
-      await deleteProject(projectId);
-      toast.success("Project deleted successfully");
-      getProjectInfo(); // Refresh the project info after deletion
-      router.push("/dashboard/inbox");
-    } catch (error) {
-      toast.error("Something went wrong");
-      toast.error(error.message);
-    }
-  };
+  useEffect(() => {
+    const urlToken = window.location.search.split("=")[1];
+    console.log("URL Token: ", urlToken);
+    setToken(urlToken);
+  }, []);
 
   useEffect(() => {
-    getProjectInfo();
-  }, []);
+    if (token) {
+      getProjectInfo();
+    }
+  }, [token]); // Run getProjectInfo when the token changes and is set
 
   return (
     <div className="bg-green-100 text-black">
@@ -54,18 +50,20 @@ export default function ProjectPage({ params }: any) {
         <p>Loading, please wait...</p> // Display while loading
       ) : (
         <>
-          <h1>{projectInfo.title}</h1>
-          <h1>Created on: {projectInfo.createdDate}</h1>
-          <h1>TaskList Size: {projectInfo.tasks.length}</h1>
+          <div>
+            <h1>{projectInfo.title}</h1>
+            <h1>Created on: {projectInfo.createdDate}</h1>
+            <h1>TaskList Size: {projectInfo.tasks.length}</h1>
+          </div>
+          <div>
+            <TaskListWrapper
+              projectId={token}
+              fetchcall={fetchToday}
+              writeperm={true}
+            />
+          </div>
         </>
       )}
-
-      <button
-        className="mt-2 bg-red-500 text-whiterounded-md rounded border border-black w-48"
-        onClick={handleDeleteProject}
-      >
-        Delete Project
-      </button>
     </div>
   );
 }

@@ -27,8 +27,8 @@ const taskSchema = new mongoose.Schema({
   },
 
   project: {
-    type: String,
-    default: null,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "project",
   },
 
   createdDate: {

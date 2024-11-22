@@ -1,53 +1,76 @@
 import { connect } from "@/dbConfig/dbConfig";
-import User from "@/models/userModel";
-import Task from "@/models/taskModel";
-import { NextRequest, NextResponse } from "next/server";
 import { getDataFromToken } from "@/helpers/getDataFromToken";
+import Project from "@/models/projectModel";
+import User from "@/models/userModel";
+import Cryptr from "cryptr";
+import { NextRequest, NextResponse } from "next/server";
 
 connect();
 
 // /api/users/login/route.tsx
 export async function POST(request: NextRequest) {
-  try {
-    const reqBody = await request.json();
-    const { title, description, dueDate, assignedDate } = reqBody;
-    console.log(dueDate);
-    // Check for missing fields
-    if (!title || !description) {
-      return NextResponse.json(
-        { error: "Please provide all fields" },
-        { status: 400 }, // Bad Request
-      );
-    }
-    console.log(reqBody);
+	try {
+		const reqBody = await request.json();
+		const { task, selectedProject } = reqBody;
 
-    //get user from database
-    const userID = getDataFromToken(request);
-    const user = await User.findOne({ _id: userID }).select("-password");
+		console.log("REQ BODY", reqBody);
+		// Check for missing fields
+		if (!task.title || !task.description) {
+			return NextResponse.json(
+				{ error: "Please provide all fields" },
+				{ status: 400 } // Bad Request
+			);
+		}
 
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
+		const cryptr = new Cryptr(process.env.TOKEN_SECRET);
+		const decryptedProject = cryptr.decrypt(selectedProject);
 
-    const newTask = new Task({
-      title: title,
-      description: description,
-      dueDate: dueDate,
-      assignedDate: assignedDate,
-      userId: userID,
-    });
+		//get user from database
+		const userID = getDataFromToken(request);
+		const user = await User.findOne({ _id: userID }).select("-password");
 
-    // Save the task
-    const savedTask = await newTask.save();
+		if (!user) {
+			return NextResponse.json({ error: "User not found" }, { status: 404 });
+		}
 
-    return NextResponse.json({
-      message: "User Found and Task Added",
-      data: user,
-    });
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: "Something went wrong" },
-      { status: 500 },
-    );
-  }
+		const currentProject = await Project.findOne({
+			_id: decryptedProject,
+			userId: userID,
+		});
+		console.log("project found");
+
+		if (!currentProject) {
+			return NextResponse.json(
+				{ error: "Project not found or not owned by user" },
+				{ status: 404 }
+			);
+		}
+
+		// Prepare new task subdocument
+		const newTask = {
+			title: task.title,
+			parent: decryptedProject,
+			folder: currentProject.title,
+			description: task.description,
+			createdDate: new Date(),
+			dueDate: task.dueDate,
+			assignedDate: task.assignedDate,
+			completestatus: false, // Default to not completed
+		};
+
+		// Add the new task subdocument to the project's tasks array
+		currentProject.tasks.push(newTask);
+
+		// Save the updated project
+		await currentProject.save();
+
+		return NextResponse.json({
+			message: "User Found and Task Added",
+		});
+	} catch (error: any) {
+		return NextResponse.json(
+			{ error: "Something went wrong" },
+			{ status: 500 }
+		);
+	}
 }

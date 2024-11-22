@@ -1,28 +1,30 @@
-import type { Metadata } from "next";
+"use client";
 import Header from "@/components/ui/header";
 import Navbar from "@/components/ui/navbar";
 
-export const metadata: Metadata = {
-  title: "TaskHero",
-  description: "Unleash Your Productivity One Task at a Time",
-};
+import { DueSoonbProvider } from "@/components/context/DueSoonContext";
+import { NavbarFunctionProvider } from "@/components/context/NavbarFunctionContext";
+import { useRef } from "react";
 
 export default function DashboardLayout({
-  children,
+	children,
 }: Readonly<{
-  children: React.ReactNode;
+	children: React.ReactNode;
 }>) {
-  return (
-    <div>
-      <div className="bg-red">
-        <Header />
-        <div className="flex">
-          <Navbar />
-          <div className="t-[60px] ml-[300px] h-full flex-1 bg-white">
-            {children}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+	const onRefreshRef = useRef<() => void>(() => {});
+	return (
+		<NavbarFunctionProvider onRefresh={() => onRefreshRef.current()}>
+			<div className="bg-red">
+				<Header />
+				<div className="flex">
+					<Navbar setOnRefresh={(fn) => (onRefreshRef.current = fn)} />
+					<DueSoonbProvider>
+						<div className="t-[60px] ml-[250px] h-full flex-1 bg-white">
+							{children}
+						</div>
+					</DueSoonbProvider>
+				</div>
+			</div>
+		</NavbarFunctionProvider>
+	);
 }
