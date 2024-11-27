@@ -34,13 +34,7 @@ export default function TaskListWrapper({ projectId, fetchcall, writeperm }) {
     <div className="mb-4 w-full bg-purple-100">
       {tasks.length > 0 ? (
         tasks.map((task) => (
-          <TaskElement
-            key={task._id}
-            task={task}
-            isOpen={openTaskIds[task._id]} // Pass the open state
-            onToggle={() => toggleTask(task._id)} // Pass toggle function
-            onRefresh={refreshTasks}
-          />
+          <TaskElement key={task._id} task={task} onRefresh={refreshTasks} />
         ))
       ) : (
         <p>No tasks available.</p>

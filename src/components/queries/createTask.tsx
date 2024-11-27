@@ -1,20 +1,20 @@
 import axios, { AxiosError } from "axios";
 import toast from "react-hot-toast";
 
-export const deleteTasks = async (
-  projectId,
-  taskId,
-  onTaskDeleted,
+export const createTask = async (
+  task,
+  selectedProject,
+  ontaskCreated,
   refreshTasks,
 ) => {
   try {
-    const response = await axios.post("/api/users/deletetask", {
-      projectId,
-      taskId,
+    const response = await axios.post("/api/users/createtask", {
+      task: task,
+      selectedProject,
     });
-    console.log("Task Deleted successfully", response.data);
-    toast.success(response.data.message);
-    onTaskDeleted(); // Call the parent function to refresh tasks
+    console.log("Task Created!", response.data);
+    toast.success("Task Created!");
+    ontaskCreated();
     refreshTasks();
   } catch (error: any) {
     if (error instanceof AxiosError) {

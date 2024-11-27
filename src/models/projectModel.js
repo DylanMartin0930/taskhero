@@ -21,6 +21,11 @@ const projectSchema = new mongoose.Schema({
     default: false,
   },
 
+  canWrite: {
+    type: Boolean,
+    default: false,
+  },
+
   tasks: [
     {
       _id: {

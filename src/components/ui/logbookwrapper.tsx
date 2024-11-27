@@ -1,29 +1,35 @@
 "use client";
-import React, { useEffect } from "react";
-import { fetchCompleteTasks } from "@/components/queries/fetchCompleteTasks";
+import React, { useEffect, useState, useCallback } from "react";
 import CompleteTaskElement from "./complete-task-element";
+import toast from "react-hot-toast";
 
-export default function LogbookWrapper({ folder }) {
-  const [tasks, setTasks] = React.useState([]); // Initialize tasks state
+export default function LogBookWrapper({ projectId, fetchcall, writeperm }) {
+  const [tasks, setTasks] = useState([]);
+  const [openTaskIds, setOpenTaskIds] = useState({}); // Track open states by task ID
 
   const refreshTasks = async () => {
-    await fetchCompleteTasks(setTasks); // Fetch tasks and update state
+    console.log("ProjectID: ", projectId);
+    if (projectId) {
+      await fetchcall(projectId, setTasks);
+
+      toast.success("project selected");
+    } else {
+      toast.error("No project selected");
+    }
   };
 
   useEffect(() => {
-    fetchCompleteTasks(setTasks);
-  }, []);
+    refreshTasks();
+  }, [projectId]);
 
   return (
-    <div className="mb-4 w-full">
-      {tasks.length > 0 ? ( // Check if tasks have items
-        tasks.map((t, index) => (
-          <div key={index} className="border p-2 mb-2 rounded-md">
-            <CompleteTaskElement task={t} deleteTodo={refreshTasks} />
-          </div>
+    <div className="mb-4 w-full bg-purple-100">
+      {tasks.length > 0 ? (
+        tasks.map((task) => (
+          <CompleteTaskElement task={task} currentProjectId={projectId} />
         ))
       ) : (
-        <p>No tasks available.</p> // Message when no tasks are found
+        <p>No tasks available.</p>
       )}
     </div>
   );

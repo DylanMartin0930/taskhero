@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     user.verifyTokenExpiry = undefined;
 
     const defaultProjects = [
-      { title: "inbox", folder: "Inbox" },
+      { title: "inbox", folder: "Inbox", canWrite: true },
       { title: "today", folder: "Today" },
       { title: "upcoming", folder: "Upcoming" },
       { title: "logbook", folder: "Logbook" },
@@ -38,6 +38,7 @@ export async function POST(request: NextRequest) {
         title: projectData.title,
         folder: projectData.folder,
         userId: user._id, // Set the user's ID for each project
+        canWrite: projectData.canWrite || false, // Set the canWrite value if it exists
         isDefault: true, // Mark the project as default
         tasks: [], // Initially no tasks in these projects
         createdDate: new Date(),

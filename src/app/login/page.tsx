@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios, { AxiosError } from "axios";
 import toast from "react-hot-toast";
-import LoginPagePresenter from "../../components/LoginPresenter";
+import LoginPagePresenter from "@/components/LoginPresenter";
 
 //Container for the Login Page
 export default function LoginPage() {
@@ -16,7 +16,8 @@ export default function LoginPage() {
   const [buttonDisabled, setButtonDisabled] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
 
-  const onLogin = async () => {
+  const onLogin = async (e) => {
+    e.preventDefault();
     try {
       setLoading(true);
       const response = await axios.post("/api/users/login", user);

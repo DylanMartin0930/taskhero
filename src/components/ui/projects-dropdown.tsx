@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { fetchProjects } from "../queries/fetchProjects";
+import { fetchWritableProjects } from "../queries/fetchWritableProjects";
 
 export default function ProjectDropDown(props) {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -7,11 +7,12 @@ export default function ProjectDropDown(props) {
   const [selectedProjectTitle, setSelectedProjectTitle] = React.useState("");
 
   useEffect(() => {
-    fetchProjects(setProjects, null, false);
+    fetchWritableProjects(setProjects, true);
   }, []); // Add an empty dependency array to avoid repeated fetching
 
   const handleDropdown = () => {
     setIsOpen(!isOpen);
+    console.log("Projects: ", projects);
   };
 
   const handleProjectClick = (projectId, projectTitle) => {

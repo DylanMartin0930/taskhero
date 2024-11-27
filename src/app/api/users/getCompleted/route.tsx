@@ -24,23 +24,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Find all projects owned by the user
-    const projects = await Project.find({
-      userId: userID,
+    // Find the specific project using the decrypted project ID
+    const project = await Project.findOne({
+      _id: decryptedId,
+      userId: user._id, // Ensure the project belongs to the user
     });
 
-    if (!projects || projects.length === 0) {
-      return NextResponse.json({ error: "No projects found" }, { status: 404 });
+    if (!project) {
+      return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
-    // Gather tasks with `completestatus: true` from all projects
-    const completedTasks = [];
-    for (const project of projects) {
-      const tasksCompleted = project.tasks.filter(
-        (task) => task.completestatus === true,
-      );
-      completedTasks.push(...tasksCompleted);
-    }
+    // Return all tasks, assuming they are already completed
+    const completedTasks = project.tasks; // All tasks are considered completed
 
     console.log("Completed tasks:", completedTasks);
 

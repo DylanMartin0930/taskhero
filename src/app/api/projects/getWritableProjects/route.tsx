@@ -10,7 +10,7 @@ connect();
 export async function POST(request: NextRequest) {
   try {
     // Parse the JSON body to get the isDefault value
-    const { isDefault, canWrite } = await request.json();
+    const { canWrite } = await request.json();
     // Get user from token
     const userID = getDataFromToken(request);
     const user = await User.findOne({ _id: userID }).select("-password");
@@ -22,8 +22,10 @@ export async function POST(request: NextRequest) {
     // Find projects and only return titles and _id fields
     const projects = await Project.find({
       userId: userID,
-      isDefault: isDefault,
+      canWrite: canWrite,
     }).select("title _id");
+
+    console.log(projects);
 
     if (!projects || projects.length === 0) {
       return NextResponse.json({ error: "No projects found" }, { status: 404 });

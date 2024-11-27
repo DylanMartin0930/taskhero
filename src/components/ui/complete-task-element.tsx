@@ -1,10 +1,15 @@
 "use client";
 import React, { useState } from "react";
-import { deleteTasks } from "../queries/deleteTask";
+import { archiveTask } from "../queries/archiveTask";
+import { recoverTask } from "../queries/recoverTask";
 
 import { IoMdArrowDropdown } from "react-icons/io";
 
-export default function CompleteTaskElement({ task, deleteTodo }) {
+export default function CompleteTaskElement({
+  task,
+  currentProjectId,
+  onRefresh,
+}) {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleToggle = () => {
@@ -46,10 +51,17 @@ export default function CompleteTaskElement({ task, deleteTodo }) {
           <p>Completed on: {formatDate(task.completeDate)}</p>
 
           <button
-            onClick={() => deleteTasks(task._id, deleteTodo)}
-            className="bg-blue-500 text-white p-2 rounded-md"
+            onClick={() => archiveTask(task, currentProjectId, onRefresh)}
+            className="bg-red-500 text-white p-2 rounded-md"
           >
-            Delete Task
+            Archive Task
+          </button>
+
+          <button
+            onClick={() => recoverTask(task, currentProjectId, onRefresh)}
+            className="bg-green-500 text-white p-2 rounded-md"
+          >
+            Recover Task
           </button>
         </div>
       )}

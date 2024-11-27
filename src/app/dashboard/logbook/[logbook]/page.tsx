@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import axios from "axios";
-import TaskListWrapper from "@/components/ui/tasklistwrapper";
+import LogBookWrapper from "@/components/ui/logbookwrapper";
 import { fetchCompletedTasks } from "@/components/queries/fetchCompletedTasks";
 
 export default function InboxPage({ params }: any) {
@@ -56,7 +56,7 @@ export default function InboxPage({ params }: any) {
             <h1>TaskList Size: {projectInfo.tasks.length}</h1>
           </div>
           <div>
-            <TaskListWrapper
+            <LogBookWrapper
               projectId={token}
               fetchcall={fetchCompletedTasks}
               writeperm={false}
