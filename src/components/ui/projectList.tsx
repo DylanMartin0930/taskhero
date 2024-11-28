@@ -21,10 +21,13 @@ function ProjectList(props) {
   };
 
   return (
-    <div className="bg-gray-100 text-black flex flex-col">
+    <div className="bg-[#d9d9d9] text-black flex flex-col border border-black p-0">
       {props.projects.length > 0 ? (
         props.projects.map((project) => (
-          <div key={project._id}>
+          <div
+            key={project._id}
+            className="p-1 hover:bg-[#b3b3b3] border-b-2 border-black"
+          >
             <Link
               href={{
                 pathname: `/dashboard/projects/${project.title}`,

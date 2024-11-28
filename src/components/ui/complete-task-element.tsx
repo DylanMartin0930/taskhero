@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { archiveTask } from "../queries/archiveTask";
 import { recoverTask } from "../queries/recoverTask";
+import { useTaskContext } from "../context/DueSoonContext";
 
 import { IoMdArrowDropdown } from "react-icons/io";
 
@@ -11,6 +12,7 @@ export default function CompleteTaskElement({
   onRefresh,
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const { refreshTasks } = useTaskContext();
 
   const handleToggle = () => {
     setIsOpen(!isOpen);
@@ -51,14 +53,18 @@ export default function CompleteTaskElement({
           <p>Completed on: {formatDate(task.completeDate)}</p>
 
           <button
-            onClick={() => archiveTask(task, currentProjectId, onRefresh)}
+            onClick={() =>
+              archiveTask(task, currentProjectId, onRefresh, refreshTasks)
+            }
             className="bg-red-500 text-white p-2 rounded-md"
           >
             Archive Task
           </button>
 
           <button
-            onClick={() => recoverTask(task, currentProjectId, onRefresh)}
+            onClick={() =>
+              recoverTask(task, currentProjectId, onRefresh, refreshTasks)
+            }
             className="bg-green-500 text-white p-2 rounded-md"
           >
             Recover Task

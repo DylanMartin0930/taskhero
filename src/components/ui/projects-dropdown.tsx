@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { fetchWritableProjects } from "../queries/fetchWritableProjects";
+import { IoMdArrowDropdown, IoMdArrowDropright } from "react-icons/io";
 
 export default function ProjectDropDown(props) {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -22,22 +23,33 @@ export default function ProjectDropDown(props) {
   };
 
   return (
-    <div className="relative">
+    <div className="">
       <button
         onClick={handleDropdown}
-        className="mt-2 bg-white text-black rounded-md border border-black w-48 p-2 text-left"
+        className="bg-white hover:bg-[#b3b3b3] text-black border-1 border-black w-full p-2 text-left flex justify-between items-center"
       >
         {selectedProjectTitle || "Assign to project"}
+
+        {/* Conditionally render the arrow icon */}
+        {isOpen ? (
+          <IoMdArrowDropdown className="ml-2" />
+        ) : (
+          <IoMdArrowDropright className="ml-2" />
+        )}
       </button>
+
       {isOpen && (
-        <div className="absolute left-0 z-50 bg-white text-black rounded-md border border-black w-48 shadow-lg">
+        <div className="absolute left-0 z-50 bg-[#d9d9d9] text-black  border border-black w-48 shadow-lg">
           {projects.map((project) => (
-            <div
-              key={project._id}
-              onClick={() => handleProjectClick(project._id, project.title)}
-              className="block p-2 cursor-pointer hover:bg-gray-200"
-            >
-              {project.title}
+            <div>
+              <div
+                key={project._id}
+                onClick={() => handleProjectClick(project._id, project.title)}
+                className="block p-2 cursor-pointer hover:bg-[#b3b3b3]"
+              >
+                {project.title}
+              </div>
+              <hr className=" border-1 border-black" />
             </div>
           ))}
         </div>

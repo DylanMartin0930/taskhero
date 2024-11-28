@@ -5,15 +5,14 @@ import ProjectDropDown from "./projects-dropdown";
 import { useTaskContext } from "../context/DueSoonContext";
 import { createTask } from "../queries/createTask";
 import { handleInputChange } from "../utils/handleInputChange";
+import { AiTwotoneCalendar } from "react-icons/ai";
+import DatePicker from "react-datepicker";
 
 function NewTask(props) {
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState(props.defaultProject);
   const [projectId, setProjectId] = useState("");
   const { refreshTasks } = useTaskContext();
-  const handleDropdown = async () => {
-    setIsOpen(!isOpen);
-  };
   const [task, setTask] = useState({
     title: "",
     description: "",
@@ -21,16 +20,20 @@ function NewTask(props) {
     assignedDate: null,
   });
 
+  const handleDropdown = () => {
+    setIsOpen(!isOpen);
+  };
+
   // Update task.project when selectedProject changes
   useEffect(() => {
     setTask((prevTask) => ({
       ...prevTask,
       project: selectedProject,
-      folder: selectedProject ? selectedProject.title : props.folder, // Change folder based on project selection
+      folder: selectedProject ? selectedProject.title : props.folder,
     }));
-  }, [selectedProject, props.folder]); // Re-run when selectedProject or props.folder changes
+  }, [selectedProject, props.folder]);
 
-  //get current projectId from URL
+  // Get current projectId from URL
   useEffect(() => {
     const urlToken = window.location.search.split("=")[1];
     setProjectId(urlToken || "");
@@ -45,59 +48,87 @@ function NewTask(props) {
         : null,
     };
     createTask(updatedTask, selectedProject, props.onTaskCreated, refreshTasks);
-    setTask({ title: "", description: "" });
+    setTask({ title: "", description: "", dueDate: null, assignedDate: null });
     setIsOpen(false); // Close the dropdown after task creation
   };
 
   return (
-    <div className="absolute ">
+    <div className="absolute">
       <button
         onClick={handleDropdown}
-        className="mt-2 bg-white text-black rounded-md border border-black w-48"
+        className="mt-2 bg-[#d9d9d9] text-black border border-black w-48"
       >
         New Task
       </button>
       {isOpen && (
-        <div className="z-40 top-full bg-white text-black mt-[1px] rounded-md border border-black w-[350px] flex flex-col">
+        <div className="z-40 top-full bg-[#d9d9d9] text-black mt-[1px] border border-black w-[350px] flex flex-col shadow-md shadow-black">
           <input
             type="text"
             placeholder="Task Title"
             name="title"
-            className="w-full p-2 placeholder-gray-500 border-b border-gray-300 focus:outline-none"
+            className=" w-full p-2 placeholder-gray-500 border-b border-gray-300 focus:outline-none"
             value={task.title}
             onChange={(e) => handleInputChange(e, setTask)}
           />
-          <input
-            type="text"
-            placeholder="Task Description"
+          <hr className="border-1 border-black" />
+          <textarea
             name="description"
-            className="w-full p-2 placeholder-gray-500 border-b border-gray-300 focus:outline-none"
             value={task.description}
             onChange={(e) => handleInputChange(e, setTask)}
+            className="border  p-1 w-full  placeholder-gray-500"
+            placeholder="Task Description"
+            onClick={(e) => e.stopPropagation()} // Prevent click from propagating
           />
+          <hr className="border-1 border-black" />
           <ProjectDropDown
             userInfo="Select Project"
             setSelectedProject={setSelectedProject}
           />
-          <input
-            type="date"
-            name="dueDate"
-            value={task.dueDate?.split("T")[0] || ""}
-            onChange={(e) => handleInputChange(e, setTask)}
-            className="border rounded p-1 w-full"
-          />
+          <hr className="border-1 border-black" />
 
-          <input
-            type="date"
-            name="assignedDate"
-            value={task.assignedDate?.split("T")[0] || ""}
-            onChange={(e) => handleInputChange(e, setTask)}
-            className="border rounded p-1 w-full"
-          />
+          {/* Due Date Section */}
+          <div className="pl-2 flex items-center space-x-2">
+            <AiTwotoneCalendar
+              className="text-black text-xl"
+              size={40} // Icon size adjusted
+            />
+            <DatePicker
+              selected={task.dueDate ? new Date(task.dueDate) : null}
+              onChange={(date) =>
+                setTask((prevTask) => ({
+                  ...prevTask,
+                  dueDate: date ? date.toISOString() : null,
+                }))
+              }
+              placeholderText="Select Due Date"
+              className="hover:bg-[#b3b3b3] p-2 placeholder-gray-500 border-b border-gray-300 focus:outline-none cursor-pointer"
+            />
+          </div>
+          <hr className="border-1 border-black" />
+
+          {/* Assigned Date Section */}
+          <div className="pl-2 flex items-center space-x-2">
+            <AiTwotoneCalendar
+              className="text-black text-xl"
+              size={40} // Icon size adjusted
+            />
+            <DatePicker
+              selected={task.assignedDate ? new Date(task.assignedDate) : null}
+              onChange={(date) =>
+                setTask((prevTask) => ({
+                  ...prevTask,
+                  assignedDate: date ? date.toISOString() : null,
+                }))
+              }
+              placeholderText="Select Assigned Date"
+              className="hover:bg-[#b3b3b3] p-2 placeholder-gray-500 border-b border-gray-300 focus:outline-none cursor-pointer"
+            />
+          </div>
+          <hr className="border-1 border-black" />
 
           <button
             onClick={onSubmit}
-            className="bg-blue-500 w-[150px] text-white p-2 rounded-md mt-2"
+            className="hover:bg-[#b3b3b3] border-r border-black p-2 w-fit"
           >
             Create Task
           </button>

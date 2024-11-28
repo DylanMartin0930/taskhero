@@ -26,7 +26,12 @@ export default function LogBookWrapper({ projectId, fetchcall, writeperm }) {
     <div className="mb-4 w-full bg-purple-100">
       {tasks.length > 0 ? (
         tasks.map((task) => (
-          <CompleteTaskElement task={task} currentProjectId={projectId} />
+          <CompleteTaskElement
+            key={task._id}
+            task={task}
+            onRefresh={refreshTasks}
+            currentProjectId={projectId}
+          />
         ))
       ) : (
         <p>No tasks available.</p>

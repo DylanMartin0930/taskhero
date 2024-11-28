@@ -10,29 +10,34 @@ function Dropdown(props) {
   };
 
   return (
-    <div className="absolute">
+    <div className="">
       <button
         onClick={handleDropdown}
-        className="mt-2 bg-white text-black rounded-md border border-black w-48"
+        className="bg-[#d9d9d9] hover:bg-[#b3b3b3] text-black border border-black w-full"
       >
         {props.userInfo}
       </button>
-      {isOpen && (
-        <div className="z-40 top-full bg-white text-black mt-[1px] rounded-md border border-black w-48">
-          {USER_ITEMS.map((items, index) => (
+
+      {/* Dropdown Menu */}
+      <div
+        className={`transition-all duration-300 overflow-hidden z-40 top-full bg-[#d9d9d9] text-black border border-black w-full ${
+          isOpen
+            ? "h-auto opacity-100" // Open state
+            : "h-0 opacity-0" // Closed state
+        }`}
+      >
+        {isOpen &&
+          USER_ITEMS.map((items, index) => (
             <div key={index}>
               <Link
-                key={items.title}
                 href={items.path}
-                className="block items-center"
+                className="p-1 border-b-2 border-black block items-center hover:bg-[#b3b3b3]"
               >
-                {items.icon}
                 <span>{items.title}</span>
               </Link>
             </div>
           ))}
-        </div>
-      )}
+      </div>
     </div>
   );
 }

@@ -1,0 +1,13 @@
+.container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: left;
+  gap: 10px;
+}
+
+.box {
+  height: auto;
+  width:;
+  background-color: yellow;
+}

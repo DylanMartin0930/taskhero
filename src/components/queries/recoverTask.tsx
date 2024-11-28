@@ -1,7 +1,12 @@
 import axios, { AxiosError } from "axios";
 import toast from "react-hot-toast";
 
-export const recoverTask = async (task, currentProjectId, onrefresh) => {
+export const recoverTask = async (
+  task,
+  currentProjectId,
+  onrefresh,
+  refreshTasks,
+) => {
   try {
     const response = await axios.post("/api/logbook/recoverTask", {
       task,
@@ -10,6 +15,7 @@ export const recoverTask = async (task, currentProjectId, onrefresh) => {
     console.log("Task Archived!", response.data);
     toast.success("Task Archived!");
     onrefresh();
+    refreshTasks();
   } catch (error: any) {
     if (error instanceof AxiosError) {
       const errorMessage = error.response?.data?.error; // No await needed

@@ -7,24 +7,24 @@ import { NavbarFunctionProvider } from "@/components/context/NavbarFunctionConte
 import { useRef } from "react";
 
 export default function DashboardLayout({
-	children,
+  children,
 }: Readonly<{
-	children: React.ReactNode;
+  children: React.ReactNode;
 }>) {
-	const onRefreshRef = useRef<() => void>(() => {});
-	return (
-		<NavbarFunctionProvider onRefresh={() => onRefreshRef.current()}>
-			<div className="bg-red">
-				<Header />
-				<div className="flex">
-					<Navbar setOnRefresh={(fn) => (onRefreshRef.current = fn)} />
-					<DueSoonbProvider>
-						<div className="t-[60px] ml-[250px] h-full flex-1 bg-white">
-							{children}
-						</div>
-					</DueSoonbProvider>
-				</div>
-			</div>
-		</NavbarFunctionProvider>
-	);
+  const onRefreshRef = useRef<() => void>(() => {});
+  return (
+    <NavbarFunctionProvider onRefresh={() => onRefreshRef.current()}>
+      <div className="bg-red">
+        <Header />
+        <div className="flex">
+          <Navbar setOnRefresh={(fn) => (onRefreshRef.current = fn)} />
+          <DueSoonbProvider>
+            <div className="t-[60px] h-full flex-1 bg-[#e2e2e2]">
+              {children}
+            </div>
+          </DueSoonbProvider>
+        </div>
+      </div>
+    </NavbarFunctionProvider>
+  );
 }
