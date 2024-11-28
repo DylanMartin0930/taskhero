@@ -39,7 +39,7 @@ export default function ProjectDropDown(props) {
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 z-50 bg-[#d9d9d9] text-black  border border-black w-48 shadow-lg">
+        <div className="absolute  z-50 bg-[#d9d9d9] text-black  border border-black w-48 shadow-lg">
           {projects.map((project) => (
             <div>
               <div

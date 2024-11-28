@@ -87,8 +87,8 @@ export default function TaskElement({ task, onRefresh }) {
       className={`bg-[#d9d9d9] border border-black mb-2 ${isOpen ? "shadow-md shadow-black" : ""}`}
       onClick={handleToggle}
     >
-      <div className="p-2 hover:bg-[#b3b3b3] transition duration-300">
-        <div className="flex items-center">
+      <div className="p-2 transition duration-300">
+        <div className="flex items-center  hover:bg-[#b3b3b3]">
           {isOpen ? <IoMdArrowDropdown /> : <IoMdArrowDropright />}
           <input
             type="checkbox"
@@ -126,46 +126,50 @@ export default function TaskElement({ task, onRefresh }) {
               />
               <hr className="border-1 border-black" />
 
-              <ProjectDropDown
-                userInfo="Select Project"
-                setSelectedProject={setSelectedProject}
-              />
-              <hr className="border-1 border-black" />
-
-              {/* Due Date Section */}
-              <div className="pl-2 flex items-center space-x-2">
-                <label htmlFor="dueDate" className="w-24">
-                  Due Date:
-                </label>
-                <AiTwotoneCalendar
-                  className="text-black text-xl"
-                  size={40} // Icon size adjusted
-                />
-                <DatePicker
-                  selected={
-                    editedTask.dueDate ? new Date(editedTask.dueDate) : null
-                  }
-                  onChange={(date) =>
-                    setTask((prevTask) => ({
-                      ...prevTask,
-                      dueDate: date ? date.toISOString() : null,
-                    }))
-                  }
-                  placeholderText="Select Date"
-                  className=" p-2 placeholder-gray-500 border-b border-gray-300 focus:outline-none cursor-pointer"
+              <div
+                onClick={(e) => e.stopPropagation()} // Prevent click from propagating
+              >
+                <ProjectDropDown
+                  userInfo="Select Project"
+                  setSelectedProject={setSelectedProject}
                 />
               </div>
               <hr className="border-1 border-black" />
 
               {/* Due Date Section */}
-              <div className="pl-2 flex items-center space-x-2 ">
+              <div
+                className="pl-2 flex items-center space-x-2"
+                onClick={(e) => e.stopPropagation()} // Prevent clicks from propagating to the parent
+              >
                 <label htmlFor="dueDate" className="w-24">
+                  Due Date:
+                </label>
+                <AiTwotoneCalendar className="text-black text-xl" size={40} />
+                <DatePicker
+                  selected={
+                    editedTask.dueDate ? new Date(editedTask.dueDate) : null
+                  }
+                  onChange={(date) =>
+                    setEditedTask((prevTask) => ({
+                      ...prevTask,
+                      dueDate: date ? date.toISOString() : null,
+                    }))
+                  }
+                  placeholderText="Select Date"
+                  className="p-2 placeholder-gray-500 border-b border-gray-300 focus:outline-none cursor-pointer"
+                />
+              </div>
+              <hr className="border-1 border-black" />
+
+              {/* Assigned Date Section */}
+              <div
+                className="pl-2 flex items-center space-x-2"
+                onClick={(e) => e.stopPropagation()} // Prevent clicks from propagating to the parent
+              >
+                <label htmlFor="assignedDate" className="w-24">
                   Assigned Date:
                 </label>
-                <AiTwotoneCalendar
-                  className="text-black text-xl"
-                  size={40} // Icon size adjusted
-                />
+                <AiTwotoneCalendar className="text-black text-xl" size={40} />
                 <DatePicker
                   selected={
                     editedTask.assignedDate
@@ -173,17 +177,16 @@ export default function TaskElement({ task, onRefresh }) {
                       : null
                   }
                   onChange={(date) =>
-                    setTask((prevTask) => ({
+                    setEditedTask((prevTask) => ({
                       ...prevTask,
                       assignedDate: date ? date.toISOString() : null,
                     }))
                   }
                   placeholderText="Select Date"
-                  className=" p-2 placeholder-gray-500 border-b border-gray-300 focus:outline-none cursor-pointer"
+                  className="p-2 placeholder-gray-500 border-b border-gray-300 focus:outline-none cursor-pointer"
                 />
               </div>
               <hr className="border-1 border-black" />
-
               <div className="flex space-x-2">
                 <button
                   onClick={(e) => {
