@@ -31,7 +31,7 @@ export default function TaskListWrapper({ projectId, fetchcall, writeperm }) {
   };
 
   return (
-    <div className="mb-4 w-full">
+    <div className="mb-4 w-full overflow-auto">
       {tasks.length > 0 ? (
         tasks.map((task) => (
           <TaskElement key={task._id} task={task} onRefresh={refreshTasks} />

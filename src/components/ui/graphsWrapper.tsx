@@ -1,40 +1,40 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { toast } from "react-hot-toast";
+// src/components/GraphWrapper.js
+import React, { useEffect } from "react";
+import { useGraphContext } from "../context/GraphContext";
 import LineGraph from "./linegraph";
+import PieChart from "./piechart";
 
-export default function GraphWrapper(props) {
-  const [data, setData] = useState([]);
-  const [haveData, setHaveData] = useState(false);
-  const token = props.token;
+export default function GraphWrapper({ token }) {
+  const {
+    weeklyData,
+    monthlyData,
+    haveWeeklyData,
+    haveMonthlyData,
+    refreshGraphs,
+  } = useGraphContext();
 
-  const getData = async () => {
-    try {
-      const response = await axios.post("/api/graphs/getWeekly", { token });
-      console.log("LineGraph Data Fetch Successful", response.data);
-      setData(response.data);
-      setHaveData(true);
-      console.log("LineGraph Data Fetch Successful", response.data.data);
-      toast.success("Linegraph Data Fetch Successful");
-    } catch (error) {
-      setHaveData(false);
-      console.error("Login error", error);
-      toast.error("Login error");
-    }
-  };
-
+  // Fetch the data when the token changes
   useEffect(() => {
-    getData();
-  }, []);
+    if (token) {
+      refreshGraphs(token); // Refresh graphs only when token changes
+    }
+  }, [token, refreshGraphs]);
+
+  // Wait for both data sets to be available before rendering
+  const hasAllData = haveWeeklyData && haveMonthlyData;
 
   return (
     <div
       className={`w-full overflow-hidden transition-all duration-500 ease-out ${
-        haveData ? "h-auto opacity-100" : "h-0 opacity-0"
+        hasAllData ? "h-auto opacity-100" : "h-0 opacity-0"
       }`}
     >
-      {haveData ? (
-        <LineGraph token={token} />
+      {hasAllData ? (
+        <LineGraph
+          weeklyData={weeklyData}
+          monthlyData={monthlyData}
+          haveData={hasAllData}
+        />
       ) : (
         <div
           className="w-full text-black bg-[#d9d9d9] border border-black"

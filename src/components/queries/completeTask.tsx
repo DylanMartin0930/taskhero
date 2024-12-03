@@ -1,7 +1,13 @@
 import axios, { AxiosError } from "axios";
 import toast from "react-hot-toast";
 
-export const completeTask = async (token, taskId, onrefresh, refreshTasks) => {
+export const completeTask = async (
+  token,
+  taskId,
+  onrefresh,
+  refreshTasks,
+  refreshGraphs,
+) => {
   try {
     const response = await axios.post("/api/users/completetask", {
       token,
@@ -11,6 +17,7 @@ export const completeTask = async (token, taskId, onrefresh, refreshTasks) => {
     toast.success("Task Completed!");
     onrefresh();
     refreshTasks();
+    refreshGraphs(token);
   } catch (error: any) {
     if (error instanceof AxiosError) {
       const errorMessage = error.response?.data?.error; // No await needed

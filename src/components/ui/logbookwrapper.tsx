@@ -5,7 +5,6 @@ import toast from "react-hot-toast";
 
 export default function LogBookWrapper({ projectId, fetchcall, writeperm }) {
   const [tasks, setTasks] = useState([]);
-  const [openTaskIds, setOpenTaskIds] = useState({}); // Track open states by task ID
 
   const refreshTasks = async () => {
     console.log("ProjectID: ", projectId);

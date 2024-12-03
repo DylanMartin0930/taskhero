@@ -9,7 +9,6 @@ const projectSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
-
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "task",
@@ -24,6 +23,11 @@ const projectSchema = new mongoose.Schema({
   canWrite: {
     type: Boolean,
     default: false,
+  },
+
+  color: {
+    type: String,
+    default: "rbga(0, 0, 0, 1)",
   },
 
   tasks: [

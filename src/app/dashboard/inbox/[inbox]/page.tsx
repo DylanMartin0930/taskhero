@@ -3,9 +3,8 @@ import { fetchTasks } from "@/components/queries/fetchTasks";
 import DueSoon from "@/components/ui/duesoon";
 import TaskListWrapper from "@/components/ui/tasklistwrapper";
 import GraphWrapper from "@/components/ui/graphsWrapper";
-import axios from "axios";
+import { getProjectInfo } from "@/components/queries/getProjectInfo";
 import React, { useEffect, useState } from "react";
-import toast from "react-hot-toast";
 import Grid from "@mui/material/Grid2";
 
 export default function InboxPage({ params }: any) {
@@ -17,24 +16,6 @@ export default function InboxPage({ params }: any) {
     tasks: [],
   });
 
-  const getProjectInfo = async () => {
-    try {
-      if (!token) return; // Ensure we don't proceed if token is empty
-      console.log("Token: ", token);
-      setIsLoading(true); // Set loading to true before starting the request
-      const response = await axios.post("/api/projects/projectInfo", {
-        token,
-      });
-      toast.success(response.data.message);
-      setProjectInfo(response.data.data);
-    } catch (error: any) {
-      toast.error("Something went wrong");
-      toast.error(error.message);
-    } finally {
-      setIsLoading(false); // Set loading to false after the request completes (either success or error)
-    }
-  };
-
   useEffect(() => {
     const urlToken = window.location.search.split("=")[1];
     console.log("URL Token: ", urlToken);
@@ -43,12 +24,12 @@ export default function InboxPage({ params }: any) {
 
   useEffect(() => {
     if (token) {
-      getProjectInfo();
+      getProjectInfo(token, setProjectInfo, setIsLoading);
     }
   }, [token]); // Run getProjectInfo when the token changes and is set
 
   return (
-    <div className="bg-[#FDF5E8] text-black h-screen flex flex-col p-[10px]">
+    <div className="bg-[#FDF5E8] text-black h-screen flex flex-col p-[10px] overflow-auto">
       {isLoading ? (
         <div className="flex justify-center items-center h-full">
           <p className="text-5xl font-bold">Loading, please wait...</p>
@@ -63,6 +44,7 @@ export default function InboxPage({ params }: any) {
             <h1 className="text-base">
               TaskList Size: {projectInfo.tasks.length}
             </h1>
+            <h1 className="text-base">Assigned Color: {projectInfo.color}</h1>
             <hr className="border-t-2 border-black my-4" /> {/* Black hr */}
           </div>
 

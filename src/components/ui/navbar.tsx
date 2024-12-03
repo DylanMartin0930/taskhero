@@ -42,14 +42,20 @@ export default function Navbar({
     <div>
       {/* Navbar */}
       <div
-        className={`relative flex flex-col space-y-[10px] p-2 left-0 h-screen bg-[#777777] transition-all duration-300 ease-in-out ${isNavbarVisible ? "w-[250px]" : "w-[40px] p-0 m-0"}`}
+        className={`relative flex flex-col space-y-[10px] p-2 left-0 h-screen bg-[#777777] transition-all duration-300 ease-in-out ${
+          isNavbarVisible ? "w-[250px]" : "w-[40px] p-0 m-0"
+        }`}
       >
         {/* Logo and Toggle Button */}
         <div
-          className={`flex justify-between items-center p-2 bg-[#D9D9D9] border border-black ${isNavbarVisible ? "shadow-black shadow-md" : ""}`}
+          className={`flex justify-between items-center p-2 bg-[#D9D9D9] border border-black ${
+            isNavbarVisible ? "shadow-black shadow-md" : "p-0 "
+          }`}
         >
           <h1
-            className={`text-black text-2xl font-bold ${isNavbarVisible ? "" : "hidden"}`}
+            className={`text-black text-2xl font-bold ${
+              isNavbarVisible ? "" : "hidden"
+            }`}
           >
             TaskHero
           </h1>
@@ -58,14 +64,18 @@ export default function Navbar({
           <IoIosMenu
             color="white"
             size={25}
-            className="text-black bg-[#777777] rounded text-3xl"
+            className={`text-black bg-[#777777] rounded text-3xl cursor-pointer ${
+              isNavbarVisible ? "w-8 h-8" : "fixed w-10 left-0"
+            }`}
             onClick={() => setIsNavbarVisible((prev) => !prev)}
-          ></IoIosMenu>
+          />
         </div>
 
         {/* User */}
         <div
-          className={`${isNavbarVisible ? "shadow-md shadow-black " : "hidden"}`}
+          className={`${
+            isNavbarVisible ? "shadow-md shadow-black " : "hidden"
+          }`}
         >
           <Dropdown userInfo={userData} />
         </div>

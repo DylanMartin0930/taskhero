@@ -6,6 +6,7 @@ import { useTaskContext } from "../context/DueSoonContext";
 import { completeTask } from "../queries/completeTask";
 import { deleteTasks } from "../queries/deleteTask";
 import { updateTask } from "../queries/updateTask";
+import { useGraphContext } from "../context/GraphContext"; // Updated import for GraphContext
 import { handleInputChange } from "../utils/handleInputChange";
 import { AiTwotoneCalendar } from "react-icons/ai";
 import DatePicker from "react-datepicker";
@@ -26,6 +27,7 @@ export default function TaskElement({ task, onRefresh }) {
   });
 
   const { refreshTasks } = useTaskContext();
+  const { refreshGraphs } = useGraphContext(); // Accessing refreshGraphs from GraphContext
 
   // Fetch the token from the URL when the component mounts
   useEffect(() => {
@@ -36,7 +38,13 @@ export default function TaskElement({ task, onRefresh }) {
   // Complete task handler
   const handleCheckbox = async (event) => {
     if (event.target.checked) {
-      await completeTask(token, task._id, onRefresh, refreshTasks);
+      await completeTask(
+        token,
+        task._id,
+        onRefresh,
+        refreshTasks,
+        refreshGraphs, // Passing refreshGraphs here
+      );
     }
   };
 
@@ -95,7 +103,7 @@ export default function TaskElement({ task, onRefresh }) {
             className="mr-2"
             checked={task.completed}
             onClick={(e) => e.stopPropagation()} // Prevent checkbox click from toggling the parent
-            onChange={handleCheckbox}
+            onChange={handleCheckbox} // Using handleCheckbox to complete task
           />
           <h2>{task.title}</h2>
         </div>

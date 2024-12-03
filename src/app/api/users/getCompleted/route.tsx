@@ -37,8 +37,6 @@ export async function POST(request: NextRequest) {
     // Return all tasks, assuming they are already completed
     const completedTasks = project.tasks; // All tasks are considered completed
 
-    console.log("Completed tasks:", completedTasks);
-
     return NextResponse.json({
       message: "Completed tasks retrieved successfully",
       data: completedTasks,

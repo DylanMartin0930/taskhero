@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { toast } from "react-hot-toast";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -23,48 +21,8 @@ ChartJS.register(
   Legend,
 );
 
-export default function LineGraph(props) {
-  const [weeklyData, setWeeklyData] = useState([]);
-  const [monthlyData, setMonthlyData] = useState([]);
-  const [haveData, setHaveData] = useState(false);
+export default function LineGraph({ weeklyData, monthlyData, haveData }) {
   const [isWeekly, setIsWeekly] = useState(true); // State to track whether we're viewing weekly or monthly data
-  const token = props.token;
-
-  // Fetch Weekly Data
-  const getWeeklyData = async () => {
-    try {
-      const response = await axios.post("/api/graphs/getWeekly", { token });
-      console.log("LineGraph Weekly Data Fetch Successful", response.data);
-      setWeeklyData(response.data);
-      setHaveData(true);
-      toast.success("Weekly Data Fetch Successful");
-    } catch (error) {
-      setHaveData(false);
-      console.error("Weekly Data Fetch error", error);
-      toast.error("Weekly Data Fetch error");
-    }
-  };
-
-  // Fetch Monthly Data
-  const getMonthlyData = async () => {
-    try {
-      const response = await axios.post("/api/graphs/getMonthly", { token });
-      console.log("LineGraph Monthly Data Fetch Successful", response.data);
-      setMonthlyData(response.data);
-      setHaveData(true);
-      toast.success("Monthly Data Fetch Successful");
-    } catch (error) {
-      setHaveData(false);
-      console.error("Monthly Data Fetch error", error);
-      toast.error("Monthly Data Fetch error");
-    }
-  };
-
-  // Fetch both sets of data on initial load
-  useEffect(() => {
-    getWeeklyData();
-    getMonthlyData();
-  }, []);
 
   // Switch between weekly and monthly data
   const handleToggle = (type: string) => {
@@ -73,19 +31,20 @@ export default function LineGraph(props) {
 
   // Determine which data to use based on the toggle state
   const currentData = isWeekly ? weeklyData : monthlyData;
+
+  // Build testData to handle multiple datasets
   const testData = {
     labels: currentData.labels, // Use the labels from the selected data (weekly or monthly)
-    datasets: [
-      {
-        label: currentData.datasets?.[0]?.label, // Access the label of the first dataset
-        data: currentData.datasets?.[0]?.data, // Access the data of the first dataset
-        borderColor: "rgb(0, 0, 0)", // Set the line color to black
-        fill: false, // Ensure the area under the line is not filled
-        tension: 0.1, // Adjust the line smoothness
-        pointRadius: 6, // Set the size of the points on the graph
-        pointHoverRadius: 8, // Set the size of the points when hovered over
-      },
-    ],
+    datasets: currentData.datasets.map((dataset, index) => ({
+      label: dataset.label, // Use the label for each dataset (parent title)
+      data: dataset.data, // Use the data for each dataset (task completion data)
+      backgroundColor: dataset.borderColor,
+      borderColor: dataset.borderColor,
+      fill: true, // Fill the area under the line with the background color
+      tension: 0.1, // Adjust the line smoothness
+      pointRadius: 4, // Set the size of the points on the graph
+      pointHoverRadius: 8, // Set the size of the points when hovered over
+    })),
   };
 
   // Update the options to enforce whole numbers on the y-axis and label it as "Task Completed"
@@ -96,7 +55,7 @@ export default function LineGraph(props) {
       x: {
         title: {
           display: true, // Display the x-axis title
-          text: isWeekly ? "Last 7 Days" : "Last 30 Days", // Label for the x-axis
+          text: "Day of the Week", // Label for the x-axis
           font: {
             size: 14, // Adjust the font size of the title
             weight: "bold", // Make the title bold
@@ -116,7 +75,7 @@ export default function LineGraph(props) {
       y: {
         title: {
           display: true, // Display the y-axis title
-          text: "Task Completed", // Label for the y-axis
+          text: "Tasks Completed", // Label for the y-axis
           font: {
             size: 14, // Adjust the font size of the title
             weight: "bold", // Make the title bold
@@ -136,7 +95,21 @@ export default function LineGraph(props) {
       },
     },
     plugins: {
+      title: {
+        display: true,
+        text: currentData.graphTitle, // Title on top of the graph
+        font: {
+          size: 16, // Adjust the font size for the title
+          weight: "bold", // Make the title bold
+          color: "rgb(0, 0, 0)", // Set title color to black
+        },
+        padding: {
+          top: 10, // Space between title and graph
+          bottom: 30, // Space between title and the chart
+        },
+      },
       legend: {
+        position: "bottom", // Position the legend at the bottom
         labels: {
           color: "rgb(0, 0, 0)", // Make legend labels black
         },

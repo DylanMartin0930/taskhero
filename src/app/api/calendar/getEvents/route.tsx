@@ -27,11 +27,15 @@ export async function GET(request: NextRequest) {
     }
 
     // Gather tasks with Completestatus: false from each project
-    const tasks = [];
+    const projectsWithTasks = [];
     projects.forEach((project) => {
       if (project.tasks && Array.isArray(project.tasks)) {
-        project.tasks.forEach((task) => {
-          if (!task.completestatus) {
+        const projectTasks = project.tasks.filter(
+          (task) => !task.completestatus,
+        );
+
+        if (projectTasks.length > 0) {
+          const formattedTasks = projectTasks.map((task) => {
             // Format due date to "year-month-day time" with time set to midnight
             const dueDate = new Date(task.dueDate);
             const formattedDueDate = `${dueDate.getUTCFullYear()}-${String(
@@ -41,21 +45,29 @@ export async function GET(request: NextRequest) {
               "0",
             )} 12:00`;
 
-            tasks.push({
-              id: "1",
+            return {
+              id: task._id, // Use task's unique ID
               title: task.title,
               start: formattedDueDate,
               end: formattedDueDate,
-            });
-          }
-        });
+            };
+          });
+
+          projectsWithTasks.push({
+            projectId: project._id,
+            projectTitle: project.title,
+            taskCount: projectTasks.length, // Include number of tasks
+            tasks: formattedTasks,
+          });
+        }
       }
     });
-    console.log("TASKS!!!", tasks);
+
+    console.log("PROJECTS WITH TASKS", projectsWithTasks);
 
     return NextResponse.json({
-      message: "Tasks Found",
-      data: tasks,
+      message: "Projects and tasks found",
+      data: projectsWithTasks,
     });
   } catch (error: any) {
     console.error(error);

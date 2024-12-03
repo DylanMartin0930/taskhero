@@ -36,39 +36,43 @@ export default function CompleteTaskElement({
     : null;
 
   return (
-    <div
-      onDoubleClick={handleToggle}
-      className="p-4 hover:bg-gray-200 transition duration-300"
-    >
+    <div className="bg-[#d9d9d9] border border-black mb-2 p-2 transition duration-300 cursor-pointer">
       <div className="flex items-center">
-        <IoMdArrowDropdown />
-        <h2>{task.title}</h2>
+        <div
+          className="flex items-center w-full space-x-2 cursor-pointer hover:bg-[#b3b3b3]"
+          onClick={handleToggle} // Apply the click handler to the whole area of the title
+        >
+          <IoMdArrowDropdown />
+          <h2 className="flex-1">{task.title}</h2>
+        </div>
       </div>
       {isOpen && (
-        <div>
-          <hr />
+        <div className="overflow-hidden transition-all duration-300 max-h-[1000px] opacity-100">
+          <hr className="border border-black" />
           <p>{task.description}</p>
           <p>Folder: {task.folder}</p>
           {dueDate && <p>Deadline: {dueDate}</p>}
           <p>Completed on: {formatDate(task.completeDate)}</p>
 
-          <button
-            onClick={() =>
-              archiveTask(task, currentProjectId, onRefresh, refreshTasks)
-            }
-            className="bg-red-500 text-white p-2 rounded-md"
-          >
-            Archive Task
-          </button>
+          <div className="flex space-x-2 mt-2">
+            <button
+              onClick={() =>
+                archiveTask(task, currentProjectId, onRefresh, refreshTasks)
+              }
+              className="bg-red-500 text-white p-2 rounded-md hover:bg-red-600"
+            >
+              Archive Task
+            </button>
 
-          <button
-            onClick={() =>
-              recoverTask(task, currentProjectId, onRefresh, refreshTasks)
-            }
-            className="bg-green-500 text-white p-2 rounded-md"
-          >
-            Recover Task
-          </button>
+            <button
+              onClick={() =>
+                recoverTask(task, currentProjectId, onRefresh, refreshTasks)
+              }
+              className="bg-green-500 text-white p-2 rounded-md hover:bg-green-600"
+            >
+              Recover Task
+            </button>
+          </div>
         </div>
       )}
     </div>

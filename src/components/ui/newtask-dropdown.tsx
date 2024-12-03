@@ -53,7 +53,7 @@ function NewTask(props) {
   };
 
   return (
-    <div className="absolute">
+    <div className="">
       <button
         onClick={handleDropdown}
         className="mt-2 bg-[#d9d9d9] text-black border border-black w-48"

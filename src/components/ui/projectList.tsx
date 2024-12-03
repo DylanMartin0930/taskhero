@@ -13,7 +13,7 @@ function ProjectList(props) {
       await deleteProject(projectId);
       props.onRefresh();
       toast.success("Project deleted successfully");
-      router.push("/dashboard/inbox");
+      router.back();
     } catch (error) {
       toast.error("Something went wrong");
       toast.error(error.message);

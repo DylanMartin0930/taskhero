@@ -7,6 +7,17 @@ import { NextRequest, NextResponse } from "next/server";
 
 connect();
 
+// Function to generate a random pastel rgba color
+function generatePastelColor() {
+  // Generate random values for red, green, and blue in the pastel range (light and soft colors)
+  const r = Math.floor(Math.random() * 128 + 128); // RGB values between 128 and 255
+  const g = Math.floor(Math.random() * 128 + 128);
+  const b = Math.floor(Math.random() * 128 + 128);
+
+  // Return the rgba color with 100% opacity (alpha = 1)
+  return `rgba(${r}, ${g}, ${b}, 1)`;
+}
+
 // /api/users/login/route.tsx
 export async function POST(request: NextRequest) {
   try {
@@ -18,11 +29,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Create a new project
+    // Generate a random pastel color for the project
+    const projectColor = generatePastelColor();
+
+    // Create a new project with the random color
     const newProject = new Project({
       title: "New Project",
       userId: userID,
       canWrite: true,
+      color: projectColor, // Assign the random pastel color
     });
 
     // Save the project
@@ -32,12 +47,13 @@ export async function POST(request: NextRequest) {
     const cryptr = new Cryptr(process.env.TOKEN_SECRET);
     const encryptedId = cryptr.encrypt(savedProject._id.toString());
 
-    // Respond with the project's title and encrypted _id
+    // Respond with the project's title, encrypted _id, and the assigned color
     return NextResponse.json({
       message: "New Project Created",
       data: {
         title: savedProject.title,
         encryptedId: encryptedId,
+        color: projectColor, // Include the color in the response
       },
     });
   } catch (error: any) {
