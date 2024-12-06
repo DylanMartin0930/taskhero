@@ -1,76 +1,87 @@
 import { connect } from "@/dbConfig/dbConfig";
-import User from "@/models/userModel";
-import Project from "@/models/projectModel";
-import { NextRequest, NextResponse } from "next/server";
 import { getDataFromToken } from "@/helpers/getDataFromToken";
+import Project from "@/models/projectModel";
+import User from "@/models/userModel";
+import { NextRequest, NextResponse } from "next/server";
 
+// Connect to database once when module is loaded
 connect();
 
+// Cache the date formatting function
+const formatDueDate = (() => {
+	const pad = (num: number) => String(num).padStart(2, "0");
+
+	return (dueDate: string | Date) => {
+		const date = new Date(dueDate);
+		return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(
+			date.getUTCDate()
+		)} 12:00`;
+	};
+})();
+
 export async function GET(request: NextRequest) {
-  try {
-    // Get user from token
-    const userID = getDataFromToken(request);
-    const user = await User.findOne({ _id: userID }).select("-password");
+	try {
+		const userID = getDataFromToken(request);
 
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
+		// Use lean() for better performance when we only need to read data
+		const user = await User.findOne({ _id: userID }).select("-password").lean();
 
-    // Find all projects for the user where Completestatus is false
-    const projects = await Project.find({
-      userId: userID,
-      Completestatus: false,
-    });
+		if (!user) {
+			return NextResponse.json({ error: "User not found" }, { status: 404 });
+		}
 
-    if (!projects || projects.length === 0) {
-      return NextResponse.json({ error: "No projects found" }, { status: 404 });
-    }
+		// Optimize query by:
+		// 1. Only selecting needed fields
+		// 2. Using lean() for better performance
+		// 3. Adding specific conditions to filter at database level
+		const projects = await Project.find({
+			userId: userID,
+			Completestatus: false,
+			title: { $ne: "today" },
+			"tasks.completestatus": false, // Only get projects with incomplete tasks
+		})
+			.select("_id title tasks")
+			.lean();
 
-    // Gather tasks with Completestatus: false from each project
-    const projectsWithTasks = [];
-    projects.forEach((project) => {
-      if (project.tasks && Array.isArray(project.tasks)) {
-        const projectTasks = project.tasks.filter(
-          (task) => !task.completestatus,
-        );
+		if (!projects?.length) {
+			return NextResponse.json({ error: "No projects found" }, { status: 404 });
+		}
 
-        if (projectTasks.length > 0) {
-          const formattedTasks = projectTasks.map((task) => {
-            // Format due date to "year-month-day time" with time set to midnight
-            const dueDate = new Date(task.dueDate);
-            const formattedDueDate = `${dueDate.getUTCFullYear()}-${String(
-              dueDate.getUTCMonth() + 1,
-            ).padStart(2, "0")}-${String(dueDate.getUTCDate()).padStart(
-              2,
-              "0",
-            )} 12:00`;
+		// Process projects in parallel for better performance
+		const projectsWithTasks = await Promise.all(
+			projects.map(async (project) => {
+				const incompleteTasks = project.tasks
+					?.filter((task) => !task.completestatus)
+					?.map((task) => ({
+						id: task._id,
+						title: task.title,
+						start: formatDueDate(task.dueDate),
+						end: formatDueDate(task.dueDate),
+					}));
 
-            return {
-              id: task._id, // Use task's unique ID
-              title: task.title,
-              start: formattedDueDate,
-              end: formattedDueDate,
-            };
-          });
+				if (!incompleteTasks?.length) return null;
 
-          projectsWithTasks.push({
-            projectId: project._id,
-            projectTitle: project.title,
-            taskCount: projectTasks.length, // Include number of tasks
-            tasks: formattedTasks,
-          });
-        }
-      }
-    });
+				return {
+					projectId: project._id,
+					projectTitle: project.title,
+					taskCount: incompleteTasks.length,
+					tasks: incompleteTasks,
+				};
+			})
+		);
 
-    console.log("PROJECTS WITH TASKS", projectsWithTasks);
+		// Filter out null values
+		const validProjects = projectsWithTasks.filter(Boolean);
 
-    return NextResponse.json({
-      message: "Projects and tasks found",
-      data: projectsWithTasks,
-    });
-  } catch (error: any) {
-    console.error(error);
-    return NextResponse.json({ error: "getTask API Failed" }, { status: 500 });
-  }
+		return NextResponse.json({
+			message: "Events retrieved successfully",
+			data: validProjects,
+		});
+	} catch (error) {
+		console.error("Calendar events error:", error);
+		return NextResponse.json(
+			{ error: error instanceof Error ? error.message : "Unknown error" },
+			{ status: 500 }
+		);
+	}
 }

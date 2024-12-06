@@ -7,7 +7,6 @@ export const fetchCompletedTasks = async (projectId, setTaskList) => {
       projectId,
     });
     setTaskList(response.data.data);
-    console.log("Task Completed!", response.data);
     toast.success("Task Completed!");
   } catch (error: any) {
     if (error instanceof AxiosError) {

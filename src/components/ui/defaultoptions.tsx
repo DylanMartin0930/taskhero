@@ -1,3 +1,4 @@
+"use client";
 import React, { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -9,6 +10,7 @@ export default function DefaultOptions(props) {
     // Prefetch all links for improved performance
     props.defaultOptions.forEach((project) => {
       const href = `/dashboard/${project.title}/${project.title}`;
+      console.log(`Prefetching: ${href}`); // Log the href being prefetched
       router.prefetch(href);
     });
   }, [props.defaultOptions, router]);

@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     const { token } = await request.json();
 
     // Decrypt the project token
-    const cryptr = new Cryptr(process.env.TOKEN_SECRET); // Replace with your secret key
+    const cryptr = new Cryptr(process.env.TOKEN_SECRET!); // Replace with your secret key
     const decryptedToken = cryptr.decrypt(token);
 
     const userID = getDataFromToken(request);
@@ -49,8 +49,8 @@ export async function POST(request: NextRequest) {
     };
 
     // Calculate weekly intervals within the 30-day range
-    const weeks = [];
-    let startOfWeek = new Date(thirtyDaysAgo);
+    const weeks: { start: Date; end: Date }[] = [];
+    const startOfWeek = new Date(thirtyDaysAgo);
     while (startOfWeek <= currentDate) {
       let endOfWeek = new Date(startOfWeek);
       endOfWeek.setDate(startOfWeek.getDate() + 6); // 7 days in each week
@@ -133,8 +133,6 @@ export async function POST(request: NextRequest) {
     const labels = weeks.map((week, index) => {
       return `${formatDate(week.start)} - ${formatDate(week.end)}`;
     });
-
-    console.log(labels, datasets);
 
     return NextResponse.json({
       graphTitle: graphTitle, // Added graphTitle

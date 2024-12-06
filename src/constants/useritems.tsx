@@ -1,10 +1,11 @@
 import { Icon } from "@iconify/react";
 import { SideNavItem } from "../types/sidenavitem";
+import { useQuery } from "@tanstack/react-query";
 
 export const USER_ITEMS: SideNavItem[] = [
   {
     title: "Profile",
-    path: "/profile",
+    path: "/dashboard/profile/id?=",
     icon: <Icon icon="lucide:profile-fill" width="24" height="24" />,
   },
 

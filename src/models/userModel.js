@@ -19,27 +19,37 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+
   isAdmin: {
     type: Boolean,
     default: false,
   },
 
-  folders: [
-    {
-      type: String,
-    },
-  ],
+  completedTasks: {
+    type: Number,
+    default: 0,
+  },
 
-  projects: [
-    {
-      type: String,
-    },
-  ],
+  currentStreak: {
+    type: Number,
+    default: 0,
+  },
+
+  longestStreak: {
+    type: Number,
+    default: 0,
+  },
+
+  lastTaskCompleted: {
+    type: Date,
+    default: null,
+  },
 
   forgotPasswordToken: String,
   forgotPasswordExpiry: Date,
   verifyToken: String,
   verifyTokenExpiry: Date,
+  verifiedOn: Date,
 });
 
 const User = mongoose.models.users || mongoose.model("users", userSchema);

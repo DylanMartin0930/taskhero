@@ -19,21 +19,47 @@ export const GraphProvider = ({ children }) => {
   const [haveWeeklyPieData, setHaveWeeklyPieData] = useState(false); // New state for checking if weekly pie data is fetched
   const [haveMonthlyPieData, setHaveMonthlyPieData] = useState(false); // New state for checking if monthly pie data is fetched
 
-  const refreshGraphs = useCallback(
+  // Function to refresh regular data (weekly and monthly)
+  const refreshRegularData = useCallback(
     async (token) => {
       // Fetch weekly data
       await getWeeklyData(token, setWeeklyData, setHaveWeeklyData);
 
       // Fetch monthly data
       await getMonthlyData(token, setMonthlyData, setHaveMonthlyData);
-
-      // Fetch weekly pie data
-      await getWeeklyPieData(token, setWeeklyPieData, setHaveWeeklyPieData); // New function call
-
-      // Fetch monthly pie data
-      await getMonthlyPieData(token, setMonthlyPieData, setHaveMonthlyPieData); // New function call
     },
-    [], // Empty dependency array ensures refreshGraphs is stable across renders
+    [], // Empty dependency array ensures refreshRegularData is stable across renders
+  );
+
+  // Function to refresh pie data (weekly and monthly) and accommodate the filter
+  const refreshPieData = useCallback(
+    async (token, filter) => {
+      // Fetch weekly pie data with the filter
+      await getWeeklyPieData(
+        token,
+        filter,
+        setWeeklyPieData,
+        setHaveWeeklyPieData,
+      ); // Pass filter here
+
+      // Fetch monthly pie data with the filter
+      await getMonthlyPieData(
+        token,
+        filter,
+        setMonthlyPieData,
+        setHaveMonthlyPieData,
+      ); // Pass filter here
+    },
+    [], // Empty dependency array ensures refreshPieData is stable across renders
+  );
+
+  // Function to refresh both sets of data (regular and pie data)
+  const refreshGraphs = useCallback(
+    async (token, filter) => {
+      await refreshRegularData(token); // Refresh regular data
+      await refreshPieData(token, filter); // Refresh pie data with the filter
+    },
+    [refreshRegularData, refreshPieData], // Ensure that both functions are stable
   );
 
   return (
@@ -48,6 +74,8 @@ export const GraphProvider = ({ children }) => {
         haveWeeklyPieData, // Include state for checking weekly pie data
         haveMonthlyPieData, // Include state for checking monthly pie data
         refreshGraphs,
+        refreshRegularData, // Expose the refreshRegularData function
+        refreshPieData, // Expose the refreshPieData function
       }}
     >
       {children}

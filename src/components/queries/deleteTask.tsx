@@ -12,7 +12,6 @@ export const deleteTasks = async (
       projectId,
       taskId,
     });
-    console.log("Task Deleted successfully", response.data);
     toast.success(response.data.message);
     onTaskDeleted(); // Call the parent function to refresh tasks
     refreshTasks();

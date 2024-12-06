@@ -24,6 +24,11 @@ export async function POST(request: NextRequest) {
     user.verifyToken = undefined;
     user.verifyTokenExpiry = undefined;
 
+    // Set verifiedOn to current date at 00:00:00.000
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0); // Set the time to 00:00:00.000
+    user.verifiedOn = currentDate;
+
     const defaultProjects = [
       {
         title: "inbox",

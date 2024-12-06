@@ -13,7 +13,7 @@ export default function DueSoon() {
           className="w-full text-black bg-[#d9d9d9] border border-black"
           style={{ height: "400px" }}
         >
-          <p>Loading, please wait...</p> // Display while loading
+          <p>Loading, please wait...</p>{" "}
         </div>
       ) : (
         <>

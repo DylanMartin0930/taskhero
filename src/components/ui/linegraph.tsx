@@ -1,15 +1,16 @@
-import React, { useEffect, useState } from "react";
-import { Line } from "react-chartjs-2";
+"use client";
 import {
-  Chart as ChartJS,
   CategoryScale,
+  Chart as ChartJS,
+  Legend,
   LinearScale,
-  PointElement,
   LineElement,
+  PointElement,
   Title,
   Tooltip,
-  Legend,
 } from "chart.js";
+import React, { useEffect, useState } from "react";
+import { Line } from "react-chartjs-2";
 
 ChartJS.register(
   CategoryScale,
@@ -40,7 +41,6 @@ export default function LineGraph({ weeklyData, monthlyData, haveData }) {
       data: dataset.data, // Use the data for each dataset (task completion data)
       backgroundColor: dataset.borderColor,
       borderColor: dataset.borderColor,
-      fill: true, // Fill the area under the line with the background color
       tension: 0.1, // Adjust the line smoothness
       pointRadius: 4, // Set the size of the points on the graph
       pointHoverRadius: 8, // Set the size of the points when hovered over

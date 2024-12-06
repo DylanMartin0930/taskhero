@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import axios from "axios";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { deleteProject } from "../queries/deleteProject";
 import { useRouter } from "next/navigation";
+import { IoTrashBin } from "react-icons/io5"; // Import the trash icon
 
 function ProjectList(props) {
   const router = useRouter();
@@ -26,22 +27,22 @@ function ProjectList(props) {
         props.projects.map((project) => (
           <div
             key={project._id}
-            className="p-1 hover:bg-[#b3b3b3] border-b-2 border-black"
+            className="p-1 hover:bg-[#b3b3b3] border-b-2 border-black flex justify-between items-center"
           >
             <Link
               href={{
                 pathname: `/dashboard/projects/${project.title}`,
                 query: { token: project._id },
               }}
+              className="flex-1"
             >
-              {" "}
-              {project.title}{" "}
+              {project.title}
             </Link>
             <button
               onClick={() => handleDeleteProject(project._id)}
-              className="ml-4 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+              className="text-[#777777] hover:text-red-700"
             >
-              Delete
+              <IoTrashBin size={24} /> {/* React icon for trash */}
             </button>
           </div>
         ))

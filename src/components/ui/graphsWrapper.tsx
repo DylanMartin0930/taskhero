@@ -1,8 +1,8 @@
+"use Client";
 // src/components/GraphWrapper.js
 import React, { useEffect } from "react";
 import { useGraphContext } from "../context/GraphContext";
 import LineGraph from "./linegraph";
-import PieChart from "./piechart";
 
 export default function GraphWrapper({ token }) {
   const {
@@ -10,15 +10,15 @@ export default function GraphWrapper({ token }) {
     monthlyData,
     haveWeeklyData,
     haveMonthlyData,
-    refreshGraphs,
+    refreshRegularData,
   } = useGraphContext();
 
-  // Fetch the data when the token changes
+  // Fetch the data only once when the token is obtained
   useEffect(() => {
-    if (token) {
-      refreshGraphs(token); // Refresh graphs only when token changes
+    if (token && !haveWeeklyData && !haveMonthlyData) {
+      refreshRegularData(token); // Trigger the API call only when token is available
     }
-  }, [token, refreshGraphs]);
+  }, [token, haveWeeklyData, haveMonthlyData, refreshRegularData]);
 
   // Wait for both data sets to be available before rendering
   const hasAllData = haveWeeklyData && haveMonthlyData;

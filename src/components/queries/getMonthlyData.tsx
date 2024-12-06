@@ -6,7 +6,6 @@ export const getMonthlyData = async (token, setMonthlyData, setHaveData) => {
     const response = await axios.post("/api/graphs/lineGraphs/getMonthly", {
       token,
     });
-    console.log("LineGraph Weekly Data Fetch Successful", response.data);
     setMonthlyData(response.data);
     setHaveData(true);
     toast.success("Weekly Data Fetch Successful");

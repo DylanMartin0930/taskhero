@@ -1,15 +1,17 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import DatePicker from "react-datepicker";
+import { AiFillFlag, AiTwotoneCalendar } from "react-icons/ai";
 import { FaTrash } from "react-icons/fa";
 import { IoMdArrowDropdown, IoMdArrowDropright } from "react-icons/io";
+import { IoFolderSharp } from "react-icons/io5"; // Solid Folder Icon
 import { useTaskContext } from "../context/DueSoonContext";
+import { useGraphContext } from "../context/GraphContext"; // Updated import for GraphContext
+import { useUser } from "../context/UserContext";
 import { completeTask } from "../queries/completeTask";
 import { deleteTasks } from "../queries/deleteTask";
 import { updateTask } from "../queries/updateTask";
-import { useGraphContext } from "../context/GraphContext"; // Updated import for GraphContext
 import { handleInputChange } from "../utils/handleInputChange";
-import { AiTwotoneCalendar } from "react-icons/ai";
-import DatePicker from "react-datepicker";
 import ProjectDropDown from "./projects-dropdown";
 
 export default function TaskElement({ task, onRefresh }) {
@@ -26,25 +28,28 @@ export default function TaskElement({ task, onRefresh }) {
     assignedDate: task.assignedDate,
   });
 
+  const { refetch } = useUser(); // Accessing refetch from UserContext
   const { refreshTasks } = useTaskContext();
-  const { refreshGraphs } = useGraphContext(); // Accessing refreshGraphs from GraphContext
+  const { refreshRegularData, refreshPieData } = useGraphContext(); // Accessing refreshGraphs from GraphContext
 
   // Fetch the token from the URL when the component mounts
   useEffect(() => {
     const urlToken = new URLSearchParams(window.location.search).get("token");
     setToken(urlToken || "");
   }, []);
-
   // Complete task handler
   const handleCheckbox = async (event) => {
     if (event.target.checked) {
       await completeTask(
         token,
-        task._id,
+        task,
         onRefresh,
+        refetch,
         refreshTasks,
-        refreshGraphs, // Passing refreshGraphs here
+        refreshRegularData,
+        refreshPieData,
       );
+      refetch();
     }
   };
 
@@ -105,7 +110,7 @@ export default function TaskElement({ task, onRefresh }) {
             onClick={(e) => e.stopPropagation()} // Prevent checkbox click from toggling the parent
             onChange={handleCheckbox} // Using handleCheckbox to complete task
           />
-          <h2>{task.title}</h2>
+          <h2 className="text-lg">{task.title}</h2>
         </div>
 
         <div
@@ -160,7 +165,7 @@ export default function TaskElement({ task, onRefresh }) {
                   onChange={(date) =>
                     setEditedTask((prevTask) => ({
                       ...prevTask,
-                      dueDate: date ? date.toISOString() : null,
+                      dueDate: date ? new Date().setHours(0, 0, 0, 0) : null,
                     }))
                   }
                   placeholderText="Select Date"
@@ -187,7 +192,9 @@ export default function TaskElement({ task, onRefresh }) {
                   onChange={(date) =>
                     setEditedTask((prevTask) => ({
                       ...prevTask,
-                      assignedDate: date ? date.toISOString() : null,
+                      assignedDate: date
+                        ? date.toISOString().split("T")[0]
+                        : null,
                     }))
                   }
                   placeholderText="Select Date"
@@ -217,33 +224,60 @@ export default function TaskElement({ task, onRefresh }) {
               </div>
             </div>
           ) : (
-            <>
-              {/* View Mode */}
-              <p>{task.description}</p>
-              <p>Folder: {task.folder}</p>
-              {dueDate && <p>Deadline: {dueDate}</p>}
-              {assignedDate && <p>Assigned for: {assignedDate}</p>}
-              <div className="flex space-x-2">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent click from propagating
-                    deleteTasks(token, task._id, onRefresh, refreshTasks);
-                  }}
-                  className="text-red-500"
-                >
-                  <FaTrash />
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent click from propagating
-                    setIsEditing(true);
-                  }}
-                  className="bg-gray-200 px-2 py-1 rounded"
-                >
-                  Edit
-                </button>
+            <div className="space-y-1">
+              {/* Task Information: Title + Description */}
+              <p className="text-m ml-2">{task.description}</p>
+              <hr className="border-1 border-black" />
+
+              {/* Task Info: Due Date, Assigned Date, Folder */}
+              <div className="ml-2 flex justify-between items-center">
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2">
+                    <IoFolderSharp size={20} />
+                    <p>{task.folder}</p>
+                  </div>
+                  {dueDate && (
+                    <div className="flex items-center space-x-2">
+                      <AiFillFlag className="text-black text-xl" size={25} />
+                      <p>{dueDate}</p>
+                    </div>
+                  )}
+                  {assignedDate && (
+                    <div className="flex items-center space-x-2">
+                      <AiTwotoneCalendar
+                        className="text-black text-xl"
+                        size={25}
+                      />
+                      <p>{assignedDate}</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Edit/Delete Buttons (right-aligned) */}
+                <div className="flex space-x-2 ml-auto mr-3">
+                  <button
+                    data-testid="delete-button"
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent click from propagating
+                      deleteTasks(token, task._id, onRefresh, refreshTasks);
+                    }}
+                    className="text-[#777777] hover:text-red-700"
+                  >
+                    <FaTrash size={25} />
+                  </button>
+                  <button
+                    data-testid="edit-button"
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent click from propagating
+                      setIsEditing(true);
+                    }}
+                    className="bg-[#b3b3b3] hover:bg-[#777777] px-2 py-1 rounded border-2 border-black"
+                  >
+                    Edit
+                  </button>
+                </div>
               </div>
-            </>
+            </div>
           )}
         </div>
       </div>

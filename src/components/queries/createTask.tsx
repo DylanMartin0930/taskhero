@@ -12,7 +12,6 @@ export const createTask = async (
       task: task,
       selectedProject,
     });
-    console.log("Task Created!", response.data);
     toast.success("Task Created!");
     ontaskCreated();
     refreshTasks();

@@ -18,7 +18,6 @@ export const updateTask = async (
     await onRefresh();
     await refreshTasks();
     await refreshDueSoon();
-    console.log("Task updated!", response.data);
     toast.success("Task updated!");
   } catch (error: any) {
     if (error instanceof AxiosError) {

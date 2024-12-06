@@ -1,68 +1,76 @@
 import { connect } from "@/dbConfig/dbConfig";
-import User from "@/models/userModel";
-import Project from "@/models/projectModel";
-import { NextRequest, NextResponse } from "next/server";
 import { getDataFromToken } from "@/helpers/getDataFromToken";
+import Project from "@/models/projectModel";
+import User from "@/models/userModel";
 import Cryptr from "cryptr";
+import { NextRequest, NextResponse } from "next/server";
 
+// Connect to database once
 connect();
 
+// Cache the Cryptr instance
+const cryptr = new Cryptr(process.env.TOKEN_SECRET!);
+
 export async function POST(request: NextRequest) {
-  try {
-    const { projectId } = await request.json();
+	try {
+		const { projectId } = await request.json();
+		const decryptedId = cryptr.decrypt(projectId);
+		const userID = getDataFromToken(request);
 
-    const cryptr = new Cryptr(process.env.TOKEN_SECRET);
-    const decryptedId = cryptr.decrypt(projectId);
+		// Use lean() for better performance when we only need to read data
+		const user = await User.findOne({ _id: userID })
+			.select("_id") // Only select the _id field since we just need to verify existence
+			.lean();
 
-    // Get user ID from the token in the request
-    const userID = getDataFromToken(request);
+		if (!user) {
+			return NextResponse.json({ error: "User not found" }, { status: 404 });
+		}
 
-    // Find the user in the database
-    const user = await User.findOne({ _id: userID }).select("-password");
+		// Get current date and 7 days from now, normalized to midnight
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
 
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
+		const nextWeek = new Date(today);
+		nextWeek.setDate(today.getDate() + 7);
+		nextWeek.setHours(0, 0, 0, 0);
 
-    // Find the specific project using both userId and decrypted projectId
-    const project = await Project.findOne({
-      _id: decryptedId,
-      userId: userID,
-    });
+		// Optimize query by:
+		// 1. Only selecting tasks field
+		// 2. Using lean() for better performance
+		// 3. Adding specific conditions to filter at database level
+		const project = await Project.findOne({
+			_id: decryptedId,
+			userId: userID,
+			"tasks.completestatus": false, // Only get projects with incomplete tasks
+			"tasks.dueDate": {
+				$gte: today,
+				$lte: nextWeek,
+			},
+		})
+			.select("tasks")
+			.lean();
 
-    if (!project) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 });
-    }
+		if (!project) {
+			return NextResponse.json({ error: "Project not found" }, { status: 404 });
+		}
 
-    // Get current date and 7 days from now, normalized to midnight (no time part)
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Normalize to midnight (no time part)
+		// Filter tasks at database level instead of in memory
+		const upcomingTasks = project.tasks.filter(
+			(task) =>
+				!task.completestatus &&
+				task.dueDate >= today &&
+				task.dueDate <= nextWeek
+		);
 
-    const nextWeek = new Date(today);
-    nextWeek.setDate(today.getDate() + 7); // 7 days from today
-    nextWeek.setHours(0, 0, 0, 0); // Normalize to midnight (no time part)
-    console.log("Today:", nextWeek);
-
-    // Gather tasks with `completestatus: false` and `duedate` within 7 days
-    const upcomingTasks = project.tasks.filter((task) => {
-      return (
-        task.completestatus === false && // Only tasks that are not complete
-        task.dueDate >= today && // Due within the next 7 days
-        task.dueDate <= nextWeek
-      );
-    });
-
-    console.log("Upcoming tasks:", upcomingTasks);
-
-    return NextResponse.json({
-      message: "Upcoming tasks retrieved successfully",
-      data: upcomingTasks,
-    });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { error: "Failed to retrieve upcoming tasks" },
-      { status: 500 },
-    );
-  }
+		return NextResponse.json({
+			message: "Upcoming tasks retrieved successfully",
+			data: upcomingTasks,
+		});
+	} catch (error) {
+		console.error(error);
+		return NextResponse.json(
+			{ error: "Failed to retrieve upcoming tasks" },
+			{ status: 500 }
+		);
+	}
 }

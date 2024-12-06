@@ -1,10 +1,15 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { describe, it, expect, vi } from "vitest";
-import TaskElement from "@/components/ui/taskelement";
+import { DueSoonbProvider } from "@/components/context/DueSoonContext";
+import { GraphProvider } from "@/components/context/GraphContext";
+import { UserProvider } from "@/components/context/UserContext";
 import { completeTask } from "@/components/queries/completeTask";
 import { deleteTasks } from "@/components/queries/deleteTask";
+import { updateTask } from "@/components/queries/updateTask";
+import TaskElement from "@/components/ui/taskelement";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// Mock functions
+// Mock the required functions and modules
 vi.mock("@/components/queries/completeTask", () => ({
   completeTask: vi.fn(),
 }));
@@ -13,133 +18,167 @@ vi.mock("@/components/queries/deleteTask", () => ({
   deleteTasks: vi.fn(),
 }));
 
+vi.mock("@/components/queries/updateTask", () => ({
+  updateTask: vi.fn(),
+}));
+
 describe("TaskElement", () => {
-  const task = {
+  const mockTask = {
     _id: "123",
-    title: "Sample Task",
-    description: "This is a sample task description",
-    folder: "Sample Folder",
+    title: "Test Task",
+    description: "Test Description",
+    folder: "Test Folder",
     completed: false,
-    dueDate: new Date("2022-11-04"),
-    assignedDate: new Date("2022-11-04"),
+    dueDate: "2024-03-20T00:00:00.000Z",
+    assignedDate: "2024-03-19T00:00:00.000Z",
+    parent: "Test Parent",
   };
 
-  const taskMinusDates = {
-    _id: "123",
-    title: "Sample Task",
-    description: "This is a sample task description",
-    folder: "Sample Folder",
-    completed: false,
-    dueDate: null,
-    assignedDate: null,
+  const mockOnRefresh = vi.fn();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
+
+  const renderWithProviders = (component) => {
+    return render(
+      <QueryClientProvider client={queryClient}>
+        <UserProvider>
+          <GraphProvider>
+            <DueSoonbProvider>{component}</DueSoonbProvider>
+          </GraphProvider>
+        </UserProvider>
+      </QueryClientProvider>
+    );
   };
 
-  const onToggle = vi.fn();
-  const onRefresh = vi.fn();
-
-  it("renders task title and checkbox", () => {
-    render(
-      <TaskElement
-        task={task}
-        isOpen={false}
-        onToggle={onToggle}
-        onRefresh={onRefresh}
-      />,
-    );
-    const title = screen.getByRole("heading", { name: "Sample Task" });
-    expect(title).toBeInTheDocument();
+  beforeEach(() => {
+    vi.clearAllMocks();
+    queryClient.clear();
   });
 
-  it("shows task details when isOpen is true", () => {
-    render(
-      <TaskElement
-        task={task}
-        isOpen={true}
-        onToggle={onToggle}
-        onRefresh={onRefresh}
-      />,
+  it("renders task title and basic information", () => {
+    renderWithProviders(
+      <TaskElement task={mockTask} onRefresh={mockOnRefresh} />
     );
 
-    // Check if details are displayed
-    const description = screen.getByText("This is a sample task description");
-    const folder = screen.getByText(/folder/i);
-    const dueDate = screen.getByText(/deadline/i);
-    const assignedDate = screen.getByText(/assigned/i);
-
-    expect(description).toBeInTheDocument();
-    expect(folder).toBeInTheDocument();
-    expect(dueDate).toBeInTheDocument();
-    expect(assignedDate).toBeInTheDocument();
+    expect(screen.getByText("Test Task")).toBeInTheDocument();
+    expect(screen.getByText("Test Description")).toBeInTheDocument();
+    expect(screen.getByText("Test Folder")).toBeInTheDocument();
   });
 
-  it("should not show due or assigned date if null", () => {
-    render(
-      <TaskElement
-        task={taskMinusDates}
-        isOpen={true}
-        onToggle={onToggle}
-        onRefresh={onRefresh}
-      />,
+  it("toggles expanded view when clicked", () => {
+    renderWithProviders(
+      <TaskElement task={mockTask} onRefresh={mockOnRefresh} />
     );
 
-    // Check if details are displayed
-    const dueDate = screen.queryByText(/deadline/i);
-    const assignedDate = screen.queryByText(/assigned/i);
+    const taskContainer = screen.getByText("Test Task").closest("div");
+    fireEvent.click(taskContainer);
 
-    expect(dueDate).not.toBeInTheDocument();
-    expect(assignedDate).not.toBeInTheDocument();
+    expect(screen.getByText("Test Description")).toBeVisible();
   });
 
-  it("calls onToggle on double-click", () => {
-    render(
-      <TaskElement
-        task={task}
-        isOpen={false}
-        onToggle={onToggle}
-        onRefresh={onRefresh}
-      />,
+  it("enters edit mode when edit button is clicked", async () => {
+    renderWithProviders(
+      <TaskElement task={mockTask} onRefresh={mockOnRefresh} />
     );
 
-    // Double-click on the task element
-    fireEvent.doubleClick(screen.getByText("Sample Task"));
+    const editButton = screen.getByRole("button", { name: /edit/i });
+    fireEvent.click(editButton);
 
-    // Check if onToggle was called
-    expect(onToggle).toHaveBeenCalledTimes(1);
+    const titleInput = screen.getByDisplayValue("Test Task");
+    const descriptionInput = screen.getByDisplayValue("Test Description");
+
+    expect(titleInput).toBeInTheDocument();
+    expect(descriptionInput).toBeInTheDocument();
   });
 
-  it("calls completeTask on checkbox click", async () => {
-    render(
-      <TaskElement
-        task={task}
-        isOpen={false}
-        onToggle={onToggle}
-        onRefresh={onRefresh}
-      />,
+  it("handles task completion", async () => {
+    renderWithProviders(
+      <TaskElement task={mockTask} onRefresh={mockOnRefresh} />
     );
 
-    // Click on the checkbox
-    fireEvent.click(screen.getByRole("checkbox"));
+    const checkbox = screen.getByRole("checkbox");
+    fireEvent.click(checkbox);
 
-    // Check if completeTask was called with correct arguments
-    await expect(completeTask).toHaveBeenCalledWith("123", onRefresh);
-  });
-
-  it("calls deleteTasks on delete button click", async () => {
-    render(
-      <TaskElement
-        task={task}
-        isOpen={true}
-        onToggle={onToggle}
-        onRefresh={onRefresh}
-      />,
-    );
-
-    // Click the delete button
-    fireEvent.click(screen.getByRole("button"));
-
-    // Check if deleteTasks was called with correct arguments
     await waitFor(() => {
-      expect(deleteTasks).toHaveBeenCalledWith("123", onRefresh);
+      expect(completeTask).toHaveBeenCalledWith(
+        expect.any(String),
+        mockTask,
+        mockOnRefresh,
+        expect.any(Function),
+        expect.any(Function),
+        expect.any(Function),
+        expect.any(Function)
+      );
+    });
+  });
+
+  it("handles task deletion", async () => {
+    renderWithProviders(
+      <TaskElement task={mockTask} onRefresh={mockOnRefresh} />
+    );
+
+    // First click to expand the task
+    const taskContainer = screen.getByText("Test Task").closest("div");
+    fireEvent.click(taskContainer);
+
+    // Use getByTestId to find the delete button
+    const deleteButton = screen.getByTestId("delete-button");
+    fireEvent.click(deleteButton);
+
+    await waitFor(() => {
+      expect(vi.mocked(deleteTasks)).toHaveBeenCalledWith(
+        expect.any(String),
+        mockTask._id,
+        mockOnRefresh,
+        expect.any(Function)
+      );
+    });
+  });
+
+  it("formats dates correctly", () => {
+    renderWithProviders(
+      <TaskElement task={mockTask} onRefresh={mockOnRefresh} />
+    );
+
+    const formattedDueDate = screen.getByText(/wednesday, march 20/i);
+    const formattedAssignedDate = screen.getByText(/tuesday, march 19/i);
+
+    expect(formattedDueDate).toBeInTheDocument();
+    expect(formattedAssignedDate).toBeInTheDocument();
+  });
+
+  it("saves edited task information", async () => {
+    renderWithProviders(
+      <TaskElement task={mockTask} onRefresh={mockOnRefresh} />
+    );
+
+    // Enter edit mode
+    const editButton = screen.getByRole("button", { name: /edit/i });
+    fireEvent.click(editButton);
+
+    // Edit title
+    const titleInput = screen.getByDisplayValue("Test Task");
+    fireEvent.change(titleInput, { target: { value: "Updated Task" } });
+
+    // Save changes
+    const saveButton = screen.getByRole("button", { name: /save/i });
+    fireEvent.click(saveButton);
+
+    await waitFor(() => {
+      expect(updateTask).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: "Updated Task",
+        }),
+        mockTask,
+        null,
+        mockOnRefresh,
+        expect.any(Function)
+      );
     });
   });
 });

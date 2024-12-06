@@ -12,8 +12,7 @@ export const recoverTask = async (
       task,
       currentProjectId,
     });
-    console.log("Task Archived!", response.data);
-    toast.success("Task Archived!");
+    toast.success("Task Recovered!");
     onrefresh();
     refreshTasks();
   } catch (error: any) {

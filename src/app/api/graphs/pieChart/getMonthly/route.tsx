@@ -9,10 +9,23 @@ connect();
 
 export async function POST(request: NextRequest) {
   try {
-    const { token } = await request.json();
+    const { token, filter } = await request.json();
+
+    // Validate token and filter
+    if (
+      !token ||
+      typeof token !== "string" ||
+      !filter ||
+      !["completed", "assigned"].includes(filter)
+    ) {
+      return NextResponse.json(
+        { error: "Invalid or missing token or filter" },
+        { status: 420 },
+      );
+    }
 
     // Decrypt the project token
-    const cryptr = new Cryptr(process.env.TOKEN_SECRET);
+    const cryptr = new Cryptr(process.env.TOKEN_SECRET!);
     const decryptedToken = cryptr.decrypt(token);
 
     const userID = getDataFromToken(request);
@@ -32,7 +45,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
-    // Get the current date and calculate the date 30 days ago
+    // Get the current date and calculate the date 7 days ago
     const currentDate = new Date();
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(currentDate.getDate() - 30);
@@ -40,12 +53,17 @@ export async function POST(request: NextRequest) {
     // Track unique `parent` attributes and their occurrence counts
     const parentCounts = {};
     project.tasks.forEach((task) => {
-      // Only consider tasks where completeDate is within the last 30 days
-      if (
-        task.completeDate &&
-        new Date(task.completeDate) >= thirtyDaysAgo &&
-        new Date(task.completeDate) <= currentDate
-      ) {
+      let taskDate;
+
+      // Determine which date to use based on the filter
+      if (filter === "completed" && task.completeDate) {
+        taskDate = new Date(task.completeDate);
+      } else if (filter === "assigned" && task.assignedDate) {
+        taskDate = new Date(task.assignedDate);
+      }
+
+      // Only consider tasks where the selected date falls within the last 7 days
+      if (taskDate && taskDate >= thirtyDaysAgo && taskDate <= currentDate) {
         if (task.parent) {
           parentCounts[task.parent] = (parentCounts[task.parent] || 0) + 1;
         }
@@ -76,8 +94,6 @@ export async function POST(request: NextRequest) {
         borderColor.push(parentColor); // Set borderColor to parent's color
       }
     }
-
-    console.log(labels, data, borderColor);
 
     return NextResponse.json({
       labels,

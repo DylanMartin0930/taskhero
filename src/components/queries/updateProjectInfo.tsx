@@ -6,7 +6,8 @@ export const updateProjectInfo = async (
   newTitle,
   newColor,
   onRefresh,
-  refreshGraphs, // Add refreshGraphs as a parameter
+  refreshRegularData, // Add refreshGraphs as a parameter
+  refreshPieData,
   setIsEditing,
   setProjectInfo,
 ) => {
@@ -18,7 +19,8 @@ export const updateProjectInfo = async (
     });
     toast.success(response.data.message);
     onRefresh(); // Refresh the project list
-    refreshGraphs(token); // Refresh the graphs
+    refreshRegularData(token); // Refresh the graphs
+    refreshPieData(token);
     setProjectInfo((prev) => ({ ...prev, title: newTitle }));
     setIsEditing(false);
   } catch (error: any) {

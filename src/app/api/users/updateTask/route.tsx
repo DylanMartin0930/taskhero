@@ -1,3 +1,4 @@
+// Updated Code
 import { connect } from "@/dbConfig/dbConfig";
 import { getDataFromToken } from "@/helpers/getDataFromToken";
 import Project from "@/models/projectModel";
@@ -26,7 +27,7 @@ export async function POST(request: NextRequest) {
       projectIdToUse = task.parent;
     } else {
       // Decrypt the selected project ID
-      const cryptr = new Cryptr(process.env.TOKEN_SECRET);
+      const cryptr = new Cryptr(process.env.TOKEN_SECRET!);
       try {
         projectIdToUse = cryptr.decrypt(selectedProject);
       } catch (err) {
@@ -78,7 +79,7 @@ export async function POST(request: NextRequest) {
       if (selectedProject) {
         const parentProject = await Project.findOne({
           _id: task.parent,
-          userId: user._id,
+          userId: userID,
         });
 
         if (!parentProject) {
@@ -100,6 +101,40 @@ export async function POST(request: NextRequest) {
 
     // Save the updated project
     await project.save();
+
+    // Initialize today's date at UTC 00:00:00
+    const todayUTC = new Date();
+    todayUTC.setUTCHours(0, 0, 0, 0); // Set time to 00:00:00 UTC
+
+    // Convert task assigned date to a comparable UTC date with time 00:00:00
+    const assignedDateUTC = new Date(editedTask.assignedDate);
+    assignedDateUTC.setUTCHours(0, 0, 0, 0); // Normalize to 00:00:00 UTC
+
+    // Compare the two dates
+    if (assignedDateUTC.getTime() === todayUTC.getTime()) {
+      const todayProject = await Project.findOne({
+        title: "today",
+        userId: userID,
+      });
+
+      if (todayProject) {
+        // Prepare the task to add to the "today" project
+        const taskCopy = {
+          ...editedTask,
+        };
+
+        // Push a copy of the updated task into the "today" project
+        todayProject.tasks.push(taskCopy);
+        await todayProject.save();
+        console.log("Task also added to 'today' project");
+      } else {
+        console.log("No 'today' project found for the user");
+      }
+    } else {
+      console.log("Task assigned date does not match today's date");
+      console.log("Task assigned date (UTC):", assignedDateUTC);
+      console.log("Today's date (UTC):", todayUTC);
+    }
 
     return NextResponse.json({
       message: "Task updated successfully",

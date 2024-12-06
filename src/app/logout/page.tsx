@@ -3,27 +3,28 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { useQuery, useMutation } from "@tanstack/react-query";
 
 export default function LogoutPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
 
-  const logout = async () => {
-    try {
+  const LogOutMutation = useMutation({
+    mutationFn: async () => {
       await axios.get("/api/users/logout");
-      console.log("Logout success");
+    },
+    onSuccess: () => {
       toast.success("Logout successful");
       router.push("/login");
-    } catch (error: any) {
-      console.log(error.message);
+    },
+    onError: (error: any) => {
       toast.error(error.message);
       setLoading(false);
-      router.push("/dashboard");
-    }
-  };
+    },
+  });
 
   useEffect(() => {
-    logout(); // Call logout function when component mounts
+    LogOutMutation.mutate();
   }, []);
 
   return (

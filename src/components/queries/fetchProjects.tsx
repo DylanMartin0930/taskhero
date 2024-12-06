@@ -10,7 +10,6 @@ export const fetchProjects = async (setProjects, onRefresh, isDefault) => {
       onRefresh();
     } // Call the onRefresh function to refresh the project list
   } catch (error) {
-    setProjects([]); // Set the projects to an empty array
     console.error("Error fetching projects:", error);
   }
 };

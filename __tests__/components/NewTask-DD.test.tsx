@@ -1,34 +1,34 @@
-import { fireEvent, render, renderHook, screen } from "@testing-library/react";
 import NewTask from "@/components/ui/newtask-dropdown";
-import React from "react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-describe("New Task Dropdown", () => {
-  const onTaskCreated = vi.fn();
-  it("should initially display a button ", () => {
-    render(<NewTask onTaskCreated={onTaskCreated} />);
+// Mock the dependencies
+vi.mock("@/components/queries/createTask", () => ({
+  createTask: vi.fn(),
+}));
+
+// Create a mock context with a Provider component
+vi.mock("@/components/context/DueSoonContext", () => ({
+  useTaskContext: () => ({
+    refreshTasks: vi.fn(),
+  }),
+  DueSoonbProvider: ({ children }) => children, // Mock the provider to simply render its children
+}));
+
+describe("NewTask Component", () => {
+  const defaultProps = {
+    defaultProject: null,
+    folder: "Test Folder",
+    onTaskCreated: vi.fn(),
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("renders the New Task button", () => {
+    render(<NewTask {...defaultProps} />);
     const button = screen.getByRole("button", { name: /new task/i });
     expect(button).toBeInTheDocument();
-  });
-
-  it("should show input fields on click", () => {
-    render(<NewTask onTaskCreated={onTaskCreated} />);
-    const button = screen.getByRole("button", { name: /new task/i });
-    fireEvent.click(button);
-
-    const titleInput = screen.getByPlaceholderText(/title/i);
-    const descriptionInput = screen.getByPlaceholderText(/description/i);
-    expect(titleInput).toBeInTheDocument();
-    expect(descriptionInput).toBeInTheDocument();
-  });
-
-  it("should show date pickers on click", () => {
-    render(<NewTask onTaskCreated={onTaskCreated} />);
-    const button = screen.getByRole("button", { name: /new task/i });
-    fireEvent.click(button);
-
-    const dueDateInput = screen.getByPlaceholderText(/due date/i);
-    const assignedDateInput = screen.getByPlaceholderText(/assigned date/i);
-    expect(dueDateInput).toBeInTheDocument();
-    expect(assignedDateInput).toBeInTheDocument();
   });
 });

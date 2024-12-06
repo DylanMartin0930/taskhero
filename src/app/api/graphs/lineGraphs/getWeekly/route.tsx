@@ -128,8 +128,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    console.log(labels, datasets);
-
     return NextResponse.json({
       graphTitle: graphTitle, // Added graphTitle
       labels: labels,

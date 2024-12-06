@@ -31,6 +31,10 @@ export async function POST(request: NextRequest) {
       username,
       email,
       password: hashedPassword,
+      currentStreak: 0,
+      longestStreak: 0,
+      completedTasks: 0,
+      lasTaskCompleted: null,
     });
 
     console.log("New user created");

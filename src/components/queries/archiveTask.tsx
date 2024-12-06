@@ -12,7 +12,6 @@ export const archiveTask = async (
       task,
       currentProjectId,
     });
-    console.log("Task Archived!", response.data);
     toast.success("Task Archived!");
     onrefresh();
     refreshTasks();

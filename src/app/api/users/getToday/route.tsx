@@ -13,6 +13,7 @@ export async function POST(request: NextRequest) {
 
     const cryptr = new Cryptr(process.env.TOKEN_SECRET);
     const decryptedId = cryptr.decrypt(projectId);
+
     // Get user ID from the token in the request
     const userID = getDataFromToken(request);
 
@@ -23,41 +24,36 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Get the current date (normalize to midnight)
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    // Find all projects owned by the user except "logbook", "trash", and "upcoming"
-    const projects = await Project.find({
+    // Find the specific project by projectId and userId
+    const project = await Project.findOne({
+      _id: decryptedId,
       userId: userID,
-      title: { $nin: ["logbook", "trash", "upcoming"] }, // Exclude specified titles
     });
 
-    if (!projects || projects.length === 0) {
-      return NextResponse.json({ error: "No projects found" }, { status: 404 });
+    if (!project) {
+      return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
-    // Gather tasks with today's assigned date from all projects
-    const todaysTasks = [];
-    for (const project of projects) {
-      const tasksForToday = project.tasks.filter((task) => {
-        const taskAssignedDate = new Date(task.assignedDate);
-        taskAssignedDate.setHours(0, 0, 0, 0); // Normalize to midnight
-        return taskAssignedDate.getTime() === today.getTime();
-      });
-      todaysTasks.push(...tasksForToday);
-    }
+    // Separate tasks based on `completeStatus`
+    const incompleteTasks = project.tasks.filter(
+      (task) => !task.completestatus,
+    );
+    const completedTasks = project.tasks.filter((task) => task.completestatus);
 
-    console.log("todays tasks:", todaysTasks);
+    // Remove completed tasks from the project
+    if (completedTasks.length > 0) {
+      project.tasks = incompleteTasks;
+      await project.save();
+    }
 
     return NextResponse.json({
-      message: "Today's tasks retrieved successfully",
-      data: todaysTasks,
+      message: "Filtered incomplete tasks and removed completed tasks",
+      data: incompleteTasks, // Return only incomplete tasks
     });
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: "Failed to retrieve tasks" },
+      { error: "Failed to filter tasks" },
       { status: 500 },
     );
   }

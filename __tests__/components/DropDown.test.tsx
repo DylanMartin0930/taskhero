@@ -1,58 +1,96 @@
-import { fireEvent, render, renderHook, screen } from "@testing-library/react";
 import Dropdown from "@/components/ui/dropdown";
+import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 
-describe("Dropdown", () => {
-  it("should Have a button", () => {
-    render(<Dropdown />);
-    const button = screen.getByRole("button", { name: /dropdown/i });
+// Mock USER_ITEMS
+vi.mock("@/constants/useritems", () => ({
+  USER_ITEMS: [
+    { title: "Profile", path: "/profile" },
+    { title: "Settings", path: "/settings" },
+    { title: "Logout", path: "/logout" },
+  ],
+}));
+
+describe("Dropdown Component", () => {
+  const defaultProps = {
+    userName: "John Doe",
+    userId: "123",
+  };
+
+  it("renders the dropdown button with user name", () => {
+    render(<Dropdown {...defaultProps} />);
+    const button = screen.getByRole("button", { name: defaultProps.userName });
     expect(button).toBeInTheDocument();
   });
 
-  it("Should not initially display dropdown items", () => {
-    render(<Dropdown />);
-    expect(screen.queryByText(/profile/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/settings/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/logout/i)).not.toBeInTheDocument();
+  it("initially renders with dropdown closed", () => {
+    render(<Dropdown {...defaultProps} />);
+    const dropdownMenu = screen.queryByRole("link", { name: /profile/i });
+    expect(dropdownMenu).not.toBeInTheDocument();
   });
 
-  it("should open the dropdown when the button is clicked", async () => {
-    render(<Dropdown />);
-    const button = screen.getByRole("button", { name: /dropdown/i });
+  it("opens dropdown menu when button is clicked", () => {
+    render(<Dropdown {...defaultProps} />);
+    const button = screen.getByRole("button", { name: defaultProps.userName });
+    
     fireEvent.click(button);
-
-    expect(screen.getByText(/profile/i)).toBeInTheDocument();
-    expect(screen.getByText(/settings/i)).toBeInTheDocument();
-    expect(screen.getByText(/logout/i)).toBeInTheDocument();
+    
+    const profileLink = screen.getByRole("link", { name: /profile/i });
+    const settingsLink = screen.getByRole("link", { name: /settings/i });
+    const logoutLink = screen.getByRole("link", { name: /logout/i });
+    
+    expect(profileLink).toBeInTheDocument();
+    expect(settingsLink).toBeInTheDocument();
+    expect(logoutLink).toBeInTheDocument();
   });
 
-  it("should close the dropdown when the button is clicked", async () => {
-    render(<Dropdown />);
-    const button = screen.getByRole("button", { name: /dropdown/i });
+  it("closes dropdown menu when button is clicked again", () => {
+    render(<Dropdown {...defaultProps} />);
+    const button = screen.getByRole("button", { name: defaultProps.userName });
+    
+    // Open dropdown
     fireEvent.click(button);
-
-    expect(screen.getByText(/profile/i)).toBeInTheDocument();
-    expect(screen.getByText(/settings/i)).toBeInTheDocument();
-    expect(screen.getByText(/logout/i)).toBeInTheDocument();
-
+    // Close dropdown
     fireEvent.click(button);
-
-    expect(screen.queryByText(/profile/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/settings/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/logout/i)).not.toBeInTheDocument();
+    
+    const dropdownMenu = screen.queryByRole("link", { name: /profile/i });
+    expect(dropdownMenu).not.toBeInTheDocument();
   });
 
-  it("should render correct links", async () => {
-    render(<Dropdown />);
-    const button = screen.getByRole("button", { name: /dropdown/i });
+  it("renders correct href for non-logout links with userId", () => {
+    render(<Dropdown {...defaultProps} />);
+    const button = screen.getByRole("button", { name: defaultProps.userName });
     fireEvent.click(button);
 
     const profileLink = screen.getByRole("link", { name: /profile/i });
     const settingsLink = screen.getByRole("link", { name: /settings/i });
-    const logoutLink = screen.getByRole("link", { name: /logout/i });
 
-    expect(profileLink).toHaveAttribute("href", "/profile");
-    expect(settingsLink).toHaveAttribute("href", "/settings");
+    expect(profileLink).toHaveAttribute("href", `/profile${defaultProps.userId}`);
+    expect(settingsLink).toHaveAttribute("href", `/settings${defaultProps.userId}`);
+  });
+
+  it("renders correct href for logout link without userId", () => {
+    render(<Dropdown {...defaultProps} />);
+    const button = screen.getByRole("button", { name: defaultProps.userName });
+    fireEvent.click(button);
+
+    const logoutLink = screen.getByRole("link", { name: /logout/i });
     expect(logoutLink).toHaveAttribute("href", "/logout");
+  });
+
+  it("applies correct styling classes when dropdown is open", () => {
+    render(<Dropdown {...defaultProps} />);
+    const button = screen.getByRole("button", { name: defaultProps.userName });
+    fireEvent.click(button);
+
+    const dropdownContainer = screen.getByRole("link", { name: /profile/i })
+      .closest("div");
+    expect(dropdownContainer?.parentElement).toHaveClass("h-auto", "opacity-100");
+  });
+
+  it("applies correct styling classes when dropdown is closed", () => {
+    render(<Dropdown {...defaultProps} />);
+    const dropdownElement = document.querySelector('[class*="transition-all"]');
+    expect(dropdownElement).toHaveClass("h-0", "opacity-0");
   });
 });

@@ -3,21 +3,24 @@ import toast from "react-hot-toast";
 
 export const completeTask = async (
   token,
-  taskId,
+  task,
   onrefresh,
+  refetch,
   refreshTasks,
-  refreshGraphs,
+  refreshRegularData,
+  refreshPieData,
 ) => {
   try {
     const response = await axios.post("/api/users/completetask", {
       token,
-      taskId,
+      task,
     });
-    console.log("Task Completed!", response.data);
     toast.success("Task Completed!");
     onrefresh();
+    refetch();
     refreshTasks();
-    refreshGraphs(token);
+    refreshRegularData(token);
+    refreshPieData(token);
   } catch (error: any) {
     if (error instanceof AxiosError) {
       const errorMessage = error.response?.data?.error; // No await needed

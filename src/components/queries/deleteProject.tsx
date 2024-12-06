@@ -6,7 +6,6 @@ export const deleteProject = async (projectId) => {
     const response = await axios.post("/api/projects/deleteProject", {
       projectId,
     });
-    console.log("Project Deleted successfully", response.data);
     toast.success(response.data.message);
   } catch (error: any) {
     if (error instanceof AxiosError) {
