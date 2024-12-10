@@ -2,28 +2,28 @@ import axios, { AxiosError } from "axios";
 import toast from "react-hot-toast";
 
 export const updateProjectInfo = async (
-  token,
-  newTitle,
-  newColor,
-  onRefresh,
-  refreshRegularData, // Add refreshGraphs as a parameter
-  refreshPieData,
-  setIsEditing,
-  setProjectInfo,
+	token,
+	newTitle,
+	newColor,
+	onRefresh,
+	refreshRegularData, // Add refreshGraphs as a parameter
+	refreshPieData,
+	setProjectInfo,
+	setIsEditing
 ) => {
-  try {
-    const response = await axios.post("/api/projects/updateTitle", {
-      projectId: token,
-      newTitle,
-      newColor,
-    });
-    toast.success(response.data.message);
-    onRefresh(); // Refresh the project list
-    refreshRegularData(token); // Refresh the graphs
-    refreshPieData(token);
-    setProjectInfo((prev) => ({ ...prev, title: newTitle }));
-    setIsEditing(false);
-  } catch (error: any) {
-    toast.error("Failed to update title");
-  }
+	try {
+		const response = await axios.post("/api/projects/updateTitle", {
+			projectId: token,
+			newTitle,
+			newColor,
+		});
+		toast.success(response.data.message);
+		onRefresh(); // Refresh the project list
+		refreshRegularData(token); // Refresh the graphs
+		refreshPieData(token);
+		setProjectInfo((prev) => ({ ...prev, title: newTitle }));
+		setIsEditing(false);
+	} catch (error: any) {
+		toast.error("Failed to update title");
+	}
 };

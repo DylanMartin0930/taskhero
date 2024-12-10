@@ -17,10 +17,7 @@ export async function POST(request: NextRequest) {
 		const decryptedId = cryptr.decrypt(projectId);
 		const userID = getDataFromToken(request);
 
-		// Use lean() for better performance when we only need to read data
-		const user = await User.findOne({ _id: userID })
-			.select("_id") // Only select the _id field since we just need to verify existence
-			.lean();
+		const user = await User.findOne({ _id: userID }).select("_id").lean();
 
 		if (!user) {
 			return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -34,18 +31,10 @@ export async function POST(request: NextRequest) {
 		nextWeek.setDate(today.getDate() + 7);
 		nextWeek.setHours(0, 0, 0, 0);
 
-		// Optimize query by:
-		// 1. Only selecting tasks field
-		// 2. Using lean() for better performance
-		// 3. Adding specific conditions to filter at database level
+		// Changed from findOne to find to get all matching projects
 		const project = await Project.findOne({
 			_id: decryptedId,
 			userId: userID,
-			"tasks.completestatus": false, // Only get projects with incomplete tasks
-			"tasks.dueDate": {
-				$gte: today,
-				$lte: nextWeek,
-			},
 		})
 			.select("tasks")
 			.lean();
@@ -54,13 +43,19 @@ export async function POST(request: NextRequest) {
 			return NextResponse.json({ error: "Project not found" }, { status: 404 });
 		}
 
-		// Filter tasks at database level instead of in memory
-		const upcomingTasks = project.tasks.filter(
-			(task) =>
+		// Filter tasks in memory with all conditions
+		const upcomingTasks = project.tasks.filter((task) => {
+			const taskDueDate = new Date(task.dueDate);
+			taskDueDate.setHours(0, 0, 0, 0);
+
+			return (
 				!task.completestatus &&
-				task.dueDate >= today &&
-				task.dueDate <= nextWeek
-		);
+				task.dueDate && // Ensure dueDate exists
+				taskDueDate >= today &&
+				taskDueDate <= nextWeek
+			);
+		});
+		console.log(upcomingTasks);
 
 		return NextResponse.json({
 			message: "Upcoming tasks retrieved successfully",
